@@ -9,6 +9,7 @@ ACCESS_TOKEN = "1916435753342509057-UTRQ8qgILYpdCMCj4Ts7jNwsPMX3oU"
 ACCESS_TOKEN_SECRET = "Ec0dnydAtRUINtXi0IwWbyFZerzkFNyDKKbvsFrO9MHRX"
 
 # Step 2: Authenticate with X API
+# For tweeting (v2 API)
 client = tweepy.Client(
     consumer_key=API_KEY,
     consumer_secret=API_SECRET,
@@ -16,7 +17,12 @@ client = tweepy.Client(
     access_token_secret=ACCESS_TOKEN_SECRET
 )
 
-# Step 3: Define that tweet_poster function
+# For media upload (v1.1 API)
+auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
+auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+api = tweepy.API(auth)
+
+# Step 3: Define the tweet_poster function
 def tweet_poster(tweet_text="Here's a Flutter code snippet! #Flutter #Dart"):
     """
     Post a tweet with the latest generated image.
@@ -36,13 +42,10 @@ def tweet_poster(tweet_text="Here's a Flutter code snippet! #Flutter #Dart"):
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Image not found at {image_path}")
     
-    # Step 3.3: Upload the image to X
-    auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
+    # Step 3.3: Upload the image to X using API v1.1
     media = api.media_upload(image_path)
     
-    # Step 3.4: Post the tweet with the image
+    # Step 3.4: Post the tweet with the image using API v2
     response = client.create_tweet(text=tweet_text, media_ids=[media.media_id])
     
     # Step 3.5: Return the tweet ID
