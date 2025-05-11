@@ -1,0 +1,173 @@
+2025-05-04 14:33:05,401 - root - CRITICAL - Critical failure: Missing Twitter credentials: CONSUMER_KEY, ACCESS_TOKEN_SECRET
+2025-05-04 14:34:31,900 - root - CRITICAL - Critical failure: Missing Twitter credentials: ACCESS_TOKEN_SECRET
+2025-05-11 11:07:15,724 - root - CRITICAL - Critical failure: Missing Twitter credentials: ACCESS_TOKEN_SECRET
+2025-05-11 11:09:46,349 - root - INFO - Starting Day 1
+2025-05-11 11:09:46,350 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:09:46,931 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-05-11 11:09:46,963 - root - ERROR - Code generation failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:09:46,966 - root - ERROR - Workflow failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:09:46,971 - root - CRITICAL - Critical failure: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:24:36,632 - root - INFO - Starting Day 1
+2025-05-11 11:24:36,633 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:24:37,062 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 11:24:37,066 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `mixtral-8x7b-32768` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:24:37,069 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `mixtral-8x7b-32768` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:24:37,072 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `mixtral-8x7b-32768` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:42:32,555 - root - INFO - Starting Day 1
+2025-05-11 11:42:32,555 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:42:33,004 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-05-11 11:42:33,007 - root - ERROR - Code generation failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:42:33,010 - root - ERROR - Workflow failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:42:33,013 - root - CRITICAL - Critical failure: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:43:23,979 - root - INFO - Starting Day 1
+2025-05-11 11:43:23,979 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:43:24,439 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-05-11 11:43:24,442 - root - ERROR - Code generation failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:43:24,446 - root - ERROR - Workflow failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:43:24,450 - root - CRITICAL - Critical failure: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:44:11,469 - root - INFO - Starting Day 1
+2025-05-11 11:44:11,470 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:44:11,777 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 11:44:11,794 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `mixtral-8x7b-32768` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:44:11,799 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `mixtral-8x7b-32768` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:44:11,802 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `mixtral-8x7b-32768` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:44:44,760 - root - INFO - Starting Day 1
+2025-05-11 11:44:44,760 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:44:45,021 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 11:44:45,024 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:44:45,026 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:44:45,029 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:48:34,592 - root - INFO - Starting Day 1
+2025-05-11 11:48:34,593 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:48:34,861 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-05-11 11:48:34,865 - root - ERROR - Code generation failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:48:34,870 - root - ERROR - Workflow failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:48:34,876 - root - CRITICAL - Critical failure: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:51:58,555 - root - INFO - Starting Day 1
+2025-05-11 11:51:58,555 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:52:00,801 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 11:52:00,804 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:52:00,804 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:52:00,807 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:55:45,454 - root - INFO - Starting Day 1
+2025-05-11 11:55:45,456 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:55:47,591 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 11:55:47,594 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:55:47,597 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:55:47,599 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:56:20,539 - root - INFO - Starting Day 1
+2025-05-11 11:56:20,541 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:56:20,941 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-05-11 11:56:20,945 - root - ERROR - Code generation failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:56:20,948 - root - ERROR - Workflow failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:56:20,951 - root - CRITICAL - Critical failure: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 11:58:45,553 - root - INFO - Starting Day 1
+2025-05-11 11:58:45,554 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 11:58:46,561 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 11:58:46,565 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:58:46,567 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 11:58:46,569 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:06:28,584 - root - INFO - Starting Day 1
+2025-05-11 12:06:28,585 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:06:29,072 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 12:06:29,076 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:06:29,078 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:06:29,080 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `llama2-70b` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:07:11,090 - root - INFO - Starting Day 1
+2025-05-11 12:07:11,091 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:07:11,343 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 12:07:11,346 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:07:11,348 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:07:11,350 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:10:10,953 - root - INFO - Starting Day 1
+2025-05-11 12:10:10,953 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:10:11,239 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 12:10:11,255 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:10:11,257 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:10:11,258 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `llama2-70b-chat` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:16:55,411 - root - INFO - Starting Day 1
+2025-05-11 12:16:55,412 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:16:55,966 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-05-11 12:16:55,969 - root - ERROR - Code generation failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 12:16:55,971 - root - ERROR - Workflow failed: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 12:16:55,974 - root - CRITICAL - Critical failure: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-05-11 12:19:06,402 - root - INFO - Starting Day 1
+2025-05-11 12:19:06,403 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:19:06,743 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-05-11 12:19:06,746 - root - ERROR - Code generation failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:19:06,748 - root - ERROR - Workflow failed: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:19:06,749 - root - CRITICAL - Critical failure: Error code: 404 - {'error': {'message': 'The model `llama2-70b-4096` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2025-05-11 12:24:56,406 - root - INFO - Starting Day 1
+2025-05-11 12:24:56,407 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:24:58,552 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-11 12:24:58,579 - root - ERROR - Workflow failed: generate_code_image() takes 1 positional argument but 2 were given
+2025-05-11 12:24:58,581 - root - CRITICAL - Critical failure: generate_code_image() takes 1 positional argument but 2 were given
+2025-05-11 12:26:06,289 - root - INFO - Starting Day 1
+2025-05-11 12:26:06,290 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:26:08,851 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-11 12:27:41,881 - root - ERROR - Workflow failed: Message: Unable to locate element: //span[text()="PNG"]/ancestor::button; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:199:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:552:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+2025-05-11 12:27:41,885 - root - CRITICAL - Critical failure: Message: Unable to locate element: //span[text()="PNG"]/ancestor::button; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:199:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:552:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+2025-05-11 12:33:59,091 - root - INFO - Starting Day 1
+2025-05-11 12:33:59,092 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:34:01,211 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-11 12:34:53,821 - root - ERROR - Workflow failed: Message: Unable to locate element: button[data-cy="export-png"]; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:199:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:552:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+2025-05-11 12:34:53,828 - root - CRITICAL - Critical failure: Message: Unable to locate element: button[data-cy="export-png"]; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:199:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:552:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+2025-05-11 12:36:58,355 - root - INFO - Starting Day 1
+2025-05-11 12:36:58,356 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:37:00,861 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-11 12:38:12,149 - root - ERROR - Workflow failed: Message: Unable to locate element: button[data-cy="export-png"]; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:199:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:552:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+2025-05-11 12:38:12,154 - root - CRITICAL - Critical failure: Message: Unable to locate element: button[data-cy="export-png"]; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:199:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:552:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+2025-05-11 12:39:00,231 - root - INFO - Starting Day 1
+2025-05-11 12:39:00,231 - root - INFO - Concept: Flutter app lifecycle
+2025-05-11 12:39:10,328 - groq._base_client - INFO - Retrying request to /openai/v1/chat/completions in 0.398572 seconds
+2025-05-11 12:39:40,095 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-11 12:41:17,420 - root - ERROR - Workflow failed: Message: Unable to locate element: button[data-cy="export-png"]; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:199:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:552:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+2025-05-11 12:41:17,426 - root - CRITICAL - Critical failure: Message: Unable to locate element: button[data-cy="export-png"]; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:199:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:552:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+

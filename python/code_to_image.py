@@ -5,14 +5,11 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-# Target file save path
-IMAGE_PATH = r"C:\Users\admin\Desktop\All\test\FlutterDailyTweet\images\carbon.png"
-
-def generate_code_image(code_text: str):
+def generate_code_image(code_text: str, output_path: str):
     # Setup Firefox options (headless optional)
     options = Options()
     options.set_preference("browser.download.folderList", 2)
-    options.set_preference("browser.download.dir", os.path.dirname(IMAGE_PATH))
+    options.set_preference("browser.download.dir", os.path.dirname(output_path))
     options.set_preference("browser.helperApps.neverAsk.saveToDisk", "image/png")
     options.set_preference("pdfjs.disabled", True)
     options.set_preference("browser.download.manager.showWhenStarting", False)
@@ -35,12 +32,12 @@ def generate_code_image(code_text: str):
         time.sleep(1)
 
         # Click "Export" button
-        export_btn = driver.find_element(By.XPATH, '//button[contains(text(), "Export")]')
+        export_btn = driver.find_element(By.CSS_SELECTOR, 'button[data-cy="export-button"]')
         export_btn.click()
         time.sleep(0.5)
 
         # Click PNG download option
-        png_option = driver.find_element(By.XPATH, '//span[text()="PNG"]/ancestor::button')
+        png_option = driver.find_element(By.CSS_SELECTOR, 'button[data-cy="export-png"]')
         png_option.click()
 
         # Wait for download (adjust if needed)
@@ -49,4 +46,4 @@ def generate_code_image(code_text: str):
     finally:
         driver.quit()
 
-    return IMAGE_PATH
+    return output_path

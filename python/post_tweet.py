@@ -21,7 +21,7 @@ class XAPI:
             consumer_key=os.getenv("CONSUMER_KEY"),
             consumer_secret=os.getenv("CONSUMER_SECRET"),
             access_token=os.getenv("ACCESS_TOKEN"),
-            access_token_secret=os.getenv("ACCESS_SECRET")
+            access_token_secret=os.getenv("ACCESS_TOKEN_SECRET")
         ))
 
     def _authenticate_v2(self):
@@ -30,7 +30,7 @@ class XAPI:
             consumer_key=os.getenv("CONSUMER_KEY"),
             consumer_secret=os.getenv("CONSUMER_SECRET"),
             access_token=os.getenv("ACCESS_TOKEN"),
-            access_token_secret=os.getenv("ACCESS_SECRET")
+            access_token_secret=os.getenv("ACCESS_TOKEN_SECRET")
         )
 
     def _validate_credentials(self):
@@ -42,8 +42,8 @@ class XAPI:
             missing.append("CONSUMER_SECRET")
         if not os.getenv("ACCESS_TOKEN"):
             missing.append("ACCESS_TOKEN")
-        if not os.getenv("ACCESS_SECRET"):
-            missing.append("ACCESS_SECRET")
+        if not os.getenv("ACCESS_TOKEN_SECRET"):
+            missing.append("ACCESS_TOKEN_SECRET")
         
         if missing:
             raise ValueError(f"Missing Twitter credentials: {', '.join(missing)}")
