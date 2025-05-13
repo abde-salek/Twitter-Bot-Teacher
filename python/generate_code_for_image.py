@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Tuple
 from groq import Groq
 from dotenv import load_dotenv
-from python.post_tweet import XAPI
+from .post_tweet import XAPI
 
 # Load environment variables
 load_dotenv()
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class FlutterDailyBot:
     def __init__(self):
-        self.groq = Groq(CONSUMER_key=os.environ["GROQ_API_KEY"])
+        self.groq = Groq(CONSUMER_KEY=os.environ["GROQ_API_KEY"])
         self.x_client = XAPI()
         self.concepts: List[str] = self._load_concepts()
         self.current_day: int = self._load_day()
@@ -23,9 +23,17 @@ class FlutterDailyBot:
         concepts_file = Path("flutter_concepts.json")
         if not concepts_file.exists():
             raise FileNotFoundError("Missing flutter_concepts.json")
-        return json.loads(concepts_file.read_text())
+        try:
+            return json.loads(concepts_file.read_text())
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON from {concepts_file}: {str(e)}")
+            raise
     
-    def _load_day(self) -> int:
+            try:
+                return int(day_file.read_text().strip())
+            except ValueError:
+                logger.warning("Non-integer value found in day_counter.txt, defaulting to 1")
+                return 1
         """Load current day counter"""
         day_file = Path("day_counter.txt")
         try:
