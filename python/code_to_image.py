@@ -1,3 +1,10 @@
+# code_to_image.py
+#
+# This module automates the process of generating a code image from a code snippet using Carbon (https://carbon.now.sh).
+# It uses Selenium to control a headless Firefox browser, paste code, and export the image.
+#
+# Usage: Call generate_code_image(code_text, output_path) to save a PNG image of the code.
+
 import os
 import time
 from selenium import webdriver
@@ -9,6 +16,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 def generate_code_image(code_text: str, output_path: str):
+    """
+    Generate a code image using Carbon and save it to output_path.
+    Args:
+        code_text (str): The code to render as an image.
+        output_path (str): The file path to save the PNG image.
+    Returns:
+        str: The output path of the saved image.
+    """
     # Setup Firefox options (headless optional)
     options = Options()
     options.set_preference("browser.download.folderList", 2)
@@ -17,7 +32,7 @@ def generate_code_image(code_text: str, output_path: str):
     options.set_preference("pdfjs.disabled", True)
     options.set_preference("browser.download.manager.showWhenStarting", False)
 
-    # Start WebDriver
+    # Start WebDriver (requires geckodriver and Firefox installed)
     driver = webdriver.Firefox(options=options)
     wait = WebDriverWait(driver, 20)  # 20 second timeout
     

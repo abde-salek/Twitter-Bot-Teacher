@@ -1,0 +1,27 @@
+name: Daily Tweet Bot
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # Runs every day at 12 PM UTC
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  tweet:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Tweet Script
+        run: python main.py

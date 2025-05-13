@@ -1,3 +1,11 @@
+# generate_code_for_image.py
+#
+# This module provides a standalone workflow for generating a Flutter code snippet and tweet,
+# then posting to Twitter/X. It can be used as a script or imported as a module.
+#
+# Usage: Run this file directly to execute the daily workflow, or import the FlutterDailyBot class.
+# Requires .env with API keys and flutter_concepts.json with concepts.
+
 import logging
 import os
 import json
@@ -12,14 +20,20 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 class FlutterDailyBot:
+    """
+    Standalone bot for generating and posting daily Flutter tips.
+    Loads concepts, generates code and tweet, and posts to Twitter/X.
+    """
     def __init__(self):
         self.groq = Groq(CONSUMER_KEY=os.environ["GROQ_API_KEY"])
         self.x_client = XAPI()
         self.concepts: List[str] = self._load_concepts()
         self.current_day: int = self._load_day()
+        # User guidance: To reset progress, set day_counter.txt to 1
+        # To add new concepts, edit flutter_concepts.json
         
     def _load_concepts(self) -> List[str]:
-        """Load concepts from JSON file"""
+        """Load concepts from JSON file (edit flutter_concepts.json to add/remove)."""
         concepts_file = Path("flutter_concepts.json")
         if not concepts_file.exists():
             raise FileNotFoundError("Missing flutter_concepts.json")
@@ -29,24 +43,26 @@ class FlutterDailyBot:
             logger.error(f"Failed to parse JSON from {concepts_file}: {str(e)}")
             raise
     
-            try:
-                return int(day_file.read_text().strip())
-            except ValueError:
-                logger.warning("Non-integer value found in day_counter.txt, defaulting to 1")
-                return 1
-        """Load current day counter"""
+    def _load_day(self) -> int:
+        """Load current day counter from day_counter.txt (set to 1 to restart)."""
         day_file = Path("day_counter.txt")
         try:
             return int(day_file.read_text().strip())
         except FileNotFoundError:
             return 1
-            
+        except ValueError:
+            logger.warning("Non-integer value found in day_counter.txt, defaulting to 1")
+            return 1
+        
     def _save_day(self):
-        """Persist day counter"""
+        """Increment and persist day counter."""
         Path("day_counter.txt").write_text(str(self.current_day + 1))
         
     def generate_code_prompt(self, concept: str) -> str:
-        """Generate Flutter code explanation using Groq"""
+        """
+        Generate a concise Flutter code example using Groq LLM.
+        Edit the prompt below to change code style or constraints.
+        """
         prompt = f"""Create a concise Flutter code example demonstrating:
         {concept}
         Include brief explanatory comments."""
@@ -63,7 +79,10 @@ class FlutterDailyBot:
             raise
 
     def generate_tweet_text(self, concept: str) -> str:
-        """Generate educational tweet using Groq"""
+        """
+        Generate educational tweet using Groq LLM.
+        Edit the prompt below to change tweet style or constraints.
+        """
         prompt = f"""Create engaging tweet about Flutter concept:
         {concept}
         Include 2 emojis and hashtags #Flutter #100DaysOfCode"""
@@ -80,7 +99,10 @@ class FlutterDailyBot:
             raise
 
     def validate_tweet(self, tweet: str) -> Tuple[bool, List[str]]:
-        """Validate tweet content"""
+        """
+        Validate tweet content for length and hashtag requirements.
+        Returns (is_valid, list_of_issues).
+        """
         if len(tweet) > 280:
             return False, ["Tweet exceeds 280 characters"]
         if "#Flutter" not in tweet:
@@ -88,10 +110,16 @@ class FlutterDailyBot:
         return True, []
 
     def daily_workflow(self):
-        """Execute full daily workflow"""
+        """
+        Execute the full daily workflow:
+        1. Loads today's concept
+        2. Generates code and tweet
+        3. Validates and posts tweet
+        4. Increments day counter
+        """
         try:
             if self.current_day > len(self.concepts):
-                logger.info("🎉 All concepts completed!")
+                logger.info("🎉 All concepts completed! Edit flutter_concepts.json to add more.")
                 return
                 
             concept = self.concepts[self.current_day - 1]
@@ -115,7 +143,7 @@ class FlutterDailyBot:
             raise
 
 if __name__ == "__main__":
-    # Configure logging
+    # Configure logging to file and console for debugging and audit trail
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

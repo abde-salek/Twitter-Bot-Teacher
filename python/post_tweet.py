@@ -1,3 +1,11 @@
+# post_tweet.py
+#
+# This module handles posting tweets (with optional images) to Twitter/X using Tweepy.
+# It supports both v1.1 (for media upload) and v2 (for tweet posting) APIs.
+#
+# Usage: Create an XAPI instance and call post_tweet(text, image_path).
+# Requires Twitter API credentials in .env file.
+
 import os
 import logging
 import tweepy
@@ -5,10 +13,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 from typing import Optional
 
-# Load environment variables
+# Load environment variables (Twitter API keys)
 load_dotenv()
 
 class XAPI:
+    """
+    Twitter/X API client for posting tweets with or without images.
+    Handles authentication and error checking.
+    """
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.CONSUMER_v1 = self._authenticate_v1()
@@ -25,7 +37,7 @@ class XAPI:
         ))
 
     def _authenticate_v2(self):
-        """Authenticate with Twitter API v2"""
+        """Authenticate with Twitter API v2 (for posting tweets)"""
         return tweepy.Client(
             consumer_key=os.getenv("CONSUMER_KEY"),
             consumer_secret=os.getenv("CONSUMER_SECRET"),
@@ -34,7 +46,7 @@ class XAPI:
         )
 
     def _validate_credentials(self):
-        """Verify all required credentials are present"""
+        """Verify all required credentials are present in the environment."""
         missing = []
         if not os.getenv("CONSUMER_KEY"):
             missing.append("CONSUMER_KEY")
@@ -50,15 +62,12 @@ class XAPI:
 
     def post_tweet(self, text: str, image_path: Optional[str] = None) -> str:
         """
-        Post a tweet with optional image
-        
+        Post a tweet with optional image.
         Args:
             text: Tweet text content
             image_path: Path to image file (PNG/JPG)
-            
         Returns:
             str: ID of the posted tweet
-            
         Raises:
             FileNotFoundError: If image file is missing
             tweepy.TweepyException: For Twitter API errors
@@ -66,7 +75,7 @@ class XAPI:
         media_ids = []
         
         try:
-            # Handle image upload
+            # Handle image upload (if provided)
             if image_path:
                 image_path = str(image_path)  # Convert Path objects
                 if not Path(image_path).exists():
@@ -77,7 +86,7 @@ class XAPI:
                 media_ids.append(media.media_id)
                 self.logger.info(f"Media uploaded (ID: {media.media_id})")
 
-            # Post tweet
+            # Post tweet (with or without image)
             self.logger.info("Posting tweet...")
             response = self.client_v2.create_tweet(
                 text=text,
@@ -95,7 +104,7 @@ class XAPI:
             self.logger.error(f"Posting failed: {str(e)}")
             raise
 
-# Example usage
+# Example usage for testing (run this file directly)
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
