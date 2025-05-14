@@ -19,7 +19,7 @@ Perfect for developers who want to grow their Flutter knowledge consistently.
 
 ## 📂 Project Structure
 
-Daily_bot (Flutter as e.g)/
+Daily_bot/
 │
 ├── python/ # Python logic
 │ ├── generate_code.py # Generates tweet content
