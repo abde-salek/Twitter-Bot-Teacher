@@ -17,9 +17,9 @@ Perfect for developers who want to grow their Flutter knowledge consistently.
 
 ---
 
-## 📂 Project Structure
-
-📦 Daily_bot/
+## 📁 Project Structure
+```bash
+Daily_bot/
 ├── python/                  # Python logic
 │   ├── generate_code.py     # Generates tweet content
 │   ├── post_tweet.py        # Handles posting to Twitter
@@ -37,9 +37,10 @@ Perfect for developers who want to grow their Flutter knowledge consistently.
 │
 ├── .github/
 │   └── workflows/
-│       └── tweet.yml       # GitHub Actions workflow for auto-tweeting
+│       └── tweet.yml       # GitHub Actions workflow
 │
 └── README.md               # This file
+```
 
 ---
 
