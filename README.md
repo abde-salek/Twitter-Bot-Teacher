@@ -19,7 +19,7 @@ Perfect for developers who want to grow their Flutter knowledge consistently.
 
 ## 📁 Project Structure
 ```bash
-Daily_bot/
+Twitter-Bot-Teacher/
 ├── python/                  # Python logic
 │   ├── generate_code.py     # Generates tweet content
 │   ├── post_tweet.py        # Handles posting to Twitter
