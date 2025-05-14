@@ -79,8 +79,8 @@ This project uses GitHub Actions to tweet daily. To enable:
 -Tweets follow a consistent, high-quality format with descriptions, benefits, and hashtags
 
   ✅ To-Do (Open Source Contributors Welcome!)
- [ ] i know this is basic level but i didn't wanna think to much about it, and this can easily scale
- [ ] Respond using the smae Grok API to 5 tweet/day that asks a question about Our concept
+ - [ ] i know this is basic level but i didn't wanna think to much about it, and this can easily scale
+ - [ ] Respond using the smae Grok API to 5 tweet/day that asks a question about Our concept
 
   📜 License
 This project is open source under the MIT License.
