@@ -17,27 +17,30 @@ Perfect for developers who want to grow their Flutter knowledge consistently.
 
 ---
 
-## 📂 Project Structure
-
-Daily_bot (Flutter as e.g)/
-│
-├── python/ # Python logic
-│ ├── generate_code.py # Generates tweet content
-│ ├── post_tweet.py # Handles posting to Twitter
-│ ├── tweet_generator.py # Coordinates tweet logic
-│ ├── code_to_image.py # (Optional) Converts code to images
+## 📁 Project Structure
+```bash
+Twitter-Bot-Teacher/
+├── python/                  # Python logic
+│   ├── generate_code.py     # Generates tweet content
+│   ├── post_tweet.py        # Handles posting to Twitter
+│   ├── tweet_generator.py   # Coordinates tweet logic
+│   ├── code_to_image.py     # (Optional) Converts code to images
+│   └── __pycache__/         # Python bytecode cache
 │
 ├── data/
-│ ├── flutter_concepts.json # JSON list of concepts
-│ └── day_counter.txt # Tracks tweet day number
+│   ├── flutter_concepts.json  # JSON list of Flutter concepts
+│   └── day_counter.txt        # Tracks current tweet day number
 │
-├── .env # API keys (not included in repo)
-├── main.py # Entrypoint for local testing
-├── requirements.txt # Python dependencies
+├── .env                    # API keys (excluded via .gitignore)
+├── main.py                 # Entry point for local testing
+├── requirements.txt        # Python dependencies
+│
 ├── .github/
-│ └── workflows/
-│ └── tweet.yml # GitHub Actions workflow
-└── README.md # This file
+│   └── workflows/
+│       └── tweet.yml       # GitHub Actions workflow
+│
+└── README.md               # This file
+```
 
 ---
 
