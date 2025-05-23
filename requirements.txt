@@ -34,3 +34,4 @@ urllib3==2.4.0
 websocket-client==1.8.0
 wsproto==1.2.0
 yt-dlp==2025.4.30
+tweepy
