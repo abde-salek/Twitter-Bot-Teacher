@@ -24,4 +24,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Tweet Script
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
+          CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
         run: python main.py
