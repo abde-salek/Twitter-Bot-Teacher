@@ -78,12 +78,12 @@ STRICT RULES:
 - Output ONLY the Dart code, nothing else."""
         
         for attempt in range(5):
-        try:
-            response = self.groq.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model="meta-llama/llama-4-scout-17b-16e-instruct",
+            try:
+                response = self.groq.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model="meta-llama/llama-4-scout-17b-16e-instruct",
                     temperature=0.7
-            )
+                )
                 code = response.choices[0].message.content.strip()
                 code = self.clean_code(code)
                 # Enforce 500 character max
@@ -98,7 +98,7 @@ STRICT RULES:
                 if len(code) <= 500 and valid and element_has_comment:
                     return code
                 logging.warning(f"Attempt {attempt+1}: Code did not meet constraints. Length: {len(code)}, Valid: {valid}, Element comments: {element_has_comment}")
-        except Exception as e:
+            except Exception as e:
                 logging.error(f"Code generation failed on attempt {attempt+1}: {str(e)}")
         return '// Code generation failed to meet strict minimal constraints.'
 
@@ -121,12 +121,12 @@ STRICT RULES:
         closest_tweet = None
         closest_diff = float('inf')
         for attempt in range(5):
-        try:
-            response = self.groq.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model="meta-llama/llama-4-scout-17b-16e-instruct",
-                temperature=0.7
-            )
+            try:
+                response = self.groq.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model="meta-llama/llama-4-scout-17b-16e-instruct",
+                    temperature=0.7
+                )
                 tweet = response.choices[0].message.content.strip()
                 # Ensure Day X: prefix is present
                 if not tweet.startswith(f"Day {self.current_day}:"):
@@ -139,7 +139,7 @@ STRICT RULES:
                     closest_diff = diff
                     closest_tweet = tweet
                 logging.warning(f"Attempt {attempt+1}: Tweet did not meet length constraint. Length: {length}")
-        except Exception as e:
+            except Exception as e:
                 logging.error(f"Tweet generation failed on attempt {attempt+1}: {str(e)}")
         logging.warning("No tweet met all constraints after 5 attempts. Using closest attempt anyway.")
         return closest_tweet or f"Day {self.current_day}: #Flutter #100DaysOfCode"
