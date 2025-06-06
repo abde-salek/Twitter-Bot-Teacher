@@ -76,7 +76,6 @@ STRICT RULES:
 - If code is longer than 12 lines, truncate and add '// ...truncated for brevity...'
 - Use clear variable names and concise comments.
 - Output ONLY the Dart code, nothing else."""
-        
         for attempt in range(5):
             try:
                 response = self.groq.chat.completions.create(
