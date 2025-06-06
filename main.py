@@ -216,4 +216,4 @@ if __name__ == "__main__":
         bot.daily_workflow()
     except Exception as e:
         logging.critical(f"Critical failure: {str(e)}")
-        raise
+        raise 
