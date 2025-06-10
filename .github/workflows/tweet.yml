@@ -23,6 +23,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install Firefox and Geckodriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox-esr
+          wget -q https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
+          tar -xzf geckodriver-v0.34.0-linux64.tar.gz
+          chmod +x geckodriver
+          sudo mv geckodriver /usr/local/bin/
+
       - name: Run Tweet Script
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
