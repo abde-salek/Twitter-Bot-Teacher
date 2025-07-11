@@ -55,7 +55,6 @@ class FlutterDailyBot:
         self.groq = Groq(api_key=os.environ["GROQ_API_KEY"])
         self.x_client = XAPI()
         self.concepts: List[str] = self._load_concepts()
-        self.current_day: int = self._load_day()
         # User guidance: To reset progress, set day_counter.txt to 1
         # To add new concepts, edit flutter_concepts.json
         
@@ -258,48 +257,104 @@ STRICT RULES:
             issues.append("No code examples detected")
         return (len(issues) == 0, issues)
 
-    def daily_workflow(self):
+    def fetch_random_flutter_concept_online(self) -> str:
         """
-        Execute the full daily workflow:
-        1. Loads today's concept
-        2. Generates code and image
-        3. Generates and validates tweet
-        4. Posts tweet with image
-        5. Increments day counter
-        
-        This is the main method that orchestrates the entire process
-        of creating and posting a daily Flutter tip.
+        Use Groq LLM to fetch a random, modern Flutter concept from the web (not from a static list).
+        Returns:
+            str: A random Flutter concept
         """
         try:
-            logging.info(f"Starting Day {self.current_day}")
-            
-            # Check if we've completed all concepts
-            if self.current_day > len(self.concepts):
-                logging.info("🎉 All concepts completed! Edit flutter_concepts.json to add more.")
+            # Provide the current concepts to Groq to avoid duplicates
+            prompt = (
+                "Find a modern, interesting, and not too basic Flutter concept or widget "
+                "that is NOT in this list (avoid duplicates or near-duplicates):\n"
+                f"{json.dumps(self.concepts)}\n"
+                "Return ONLY the name of the concept or widget, nothing else. "
+                "It should be something a Flutter developer would find new or useful in 2024."
+            )
+            response = self.groq.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                temperature=0.9
+            )
+            concept = response.choices[0].message.content.strip()
+            # Clean up any extra text
+            concept = concept.split('\n')[0].strip('-* \\t')
+            return concept
+        except Exception as e:
+            logging.error(f"Groq LLM failed to fetch a random Flutter concept: {str(e)}")
+            # Fallback: return a static string
+            return "Flutter WebAssembly support"
+
+    def is_similar_concept(self, new_concept: str, existing_concepts: list) -> bool:
+        """
+        Check if the new concept is similar to any existing concept (case-insensitive substring match).
+        Args:
+            new_concept (str): The new concept to check
+            existing_concepts (list): List of existing concepts
+        Returns:
+            bool: True if similar, False otherwise
+        """
+        new_concept_lower = new_concept.lower()
+        for concept in existing_concepts:
+            if new_concept_lower in concept.lower() or concept.lower() in new_concept_lower:
+                return True
+        return False
+
+    def add_concept_to_file(self, concept: str):
+        """
+        Add a new concept to flutter_concepts.json.
+        Args:
+            concept (str): The concept to add
+        """
+        concepts_file = Path("flutter_concepts.json")
+        concepts = json.loads(concepts_file.read_text())
+        concepts.append(concept)
+        concepts_file.write_text(json.dumps(concepts, indent=2))
+
+    def daily_workflow(self):
+        """
+        New workflow:
+        1. Fetch a random Flutter concept online
+        2. If it or a similar one exists in flutter_concepts.json, re-run step 1
+        3. If not, add it to flutter_concepts.json
+        4. Generate tweet and code snippet (less than 30 lines)
+        5. Generate code image
+        """
+        try:
+            for _ in range(10):  # Avoid infinite loop
+                concept = self.fetch_random_flutter_concept_online()
+                if not self.is_similar_concept(concept, self.concepts):
+                    break
+                logging.info(f"Concept '{concept}' already exists or is similar. Retrying...")
+            else:
+                logging.error("Failed to find a new unique concept after 10 attempts.")
                 return
-                
-            # Get today's concept
-            concept = self.concepts[self.current_day - 1]
-            logging.info(f"Concept: {concept}")
-            
-            # Generate code and create image
+
+            logging.info(f"New concept found: {concept}")
+            self.add_concept_to_file(concept)
+            self.concepts.append(concept)
+
+            # Generate tweet
+            tweet = self.generate_tweet_text(concept)
+            logging.info(f"Generated tweet: {tweet}")
+
+            # Generate code (limit to 30 lines)
             code = self.generate_code(concept)
+            code_lines = code.split('\n')
+            if len(code_lines) > 30:
+                code = '\n'.join(code_lines[:30]) + '\n// ...truncated for brevity...'
+            logging.info(f"Generated code:\n{code}")
+
+            # Generate code image
             image_path = Path("images") / "carbon.png"
             generate_code_image(code, str(image_path))
-            
-            # Generate and validate tweet
-            tweet = self.generate_tweet_text(concept).strip().replace('\n', ' ')
-            valid, issues = self.validate_tweet(tweet)
-            
-            if not valid:
-                logging.warning(f"Validation issues: {issues}")
-                tweet += "\n\n(Revised version pending)"
-                
-            # Post tweet and update progress
+            logging.info(f"Code image generated at {image_path}")
+
+            # Post tweet and image
             tweet_id = self.x_client.post_tweet(tweet, str(image_path))
-            self._save_day()
             logging.info(f"Successfully posted tweet {tweet_id}")
-            
+
         except Exception as e:
             logging.error(f"Workflow failed: {str(e)}")
             raise
