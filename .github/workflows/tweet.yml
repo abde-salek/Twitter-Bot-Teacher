@@ -18,19 +18,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install dependencies (Firefox & Geckodriver)
         run: |
           sudo apt-get update
-          sudo apt-get install -y firefox
-          sudo apt-get install -y libgtk-3-0 libdbus-glib-1-2 libxt6
-          wget -q https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
-          tar -xzf geckodriver-v0.34.0-linux64.tar.gz
-          sudo mv geckodriver /usr/local/bin/
-
-      - name: Install Firefox and Geckodriver
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox
+          # Install required libraries
+          sudo apt-get install -y libgtk-3-0 libdbus-glib-1-2 libxt6 wget tar
+          # Install Firefox via Snap if not already installed
+          if ! command -v firefox &> /dev/null; then
+            sudo snap install firefox
+          fi
+          # Download and install Geckodriver
           wget -q https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
           tar -xzf geckodriver-v0.34.0-linux64.tar.gz
           chmod +x geckodriver
