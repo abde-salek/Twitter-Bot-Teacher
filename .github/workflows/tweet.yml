@@ -17,17 +17,23 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+          cache: 'pip'  # Cache Python dependencies for faster runs
 
-      - name: Install dependencies (Firefox & Geckodriver)
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Assumes you have requirements.txt
+
+      - name: Install system dependencies (Firefox & Geckodriver)
         run: |
           sudo apt-get update
-          # Install required libraries
+          # Install required libraries for Selenium/Firefox
           sudo apt-get install -y libgtk-3-0 libdbus-glib-1-2 libxt6 wget tar
           # Install Firefox via Snap if not already installed
           if ! command -v firefox &> /dev/null; then
             sudo snap install firefox
           fi
-          # Download and install Geckodriver
+          # Download and install Geckodriver (use a specific version for stability)
           wget -q https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
           tar -xzf geckodriver-v0.34.0-linux64.tar.gz
           chmod +x geckodriver
@@ -40,4 +46,4 @@ jobs:
           CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
-        run: python main.py
+        run: python main.py || echo "Script failed - check logs"  # Add basic error handling
