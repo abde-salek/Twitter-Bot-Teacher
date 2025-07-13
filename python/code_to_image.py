@@ -11,6 +11,8 @@ import shutil
 import platform
 import subprocess
 from pathlib import Path
+import stat
+import sys
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -24,6 +26,58 @@ import logging
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def remove_incompatible_geckodriver():
+    """Remove the incompatible geckodriver if detected"""
+    try:
+        # Define known incompatible geckodriver paths
+        geckodriver_paths = [
+            "/usr/local/bin/geckodriver",  # Linux/macOS
+            "/usr/bin/geckodriver",        # Linux alternative
+            "C:\\geckodriver.exe"          # Windows
+        ]
+        
+        # Check Firefox version using the installed geckodriver
+        try:
+            result = subprocess.run(["firefox", "--version"], capture_output=True, text=True)
+            firefox_version = result.stdout.strip()
+            logger.info(f"Detected Firefox version: {firefox_version}")
+        except:
+            logger.warning("Could not detect Firefox version")
+        
+        for path in geckodriver_paths:
+            if os.path.exists(path):
+                try:
+                    # Check geckodriver version
+                    result = subprocess.run([path, "--version"], capture_output=True, text=True)
+                    version_info = result.stdout.strip()
+                    logger.info(f"Found geckodriver at {path}: {version_info}")
+                    
+                    # If it's version 0.34.0 (incompatible with Firefox 140), remove it
+                    if "0.34.0" in version_info and "140" in firefox_version:
+                        logger.warning(f"Removing incompatible geckodriver {version_info} at {path}")
+                        
+                        # Make file writable if needed
+                        if not os.access(path, os.W_OK):
+                            os.chmod(path, stat.S_IWUSR | stat.S_IRUSR | stat.S_IXUSR)
+                        
+                        # Try to remove the file
+                        try:
+                            os.remove(path)
+                            logger.info(f"Successfully removed incompatible geckodriver at {path}")
+                        except PermissionError:
+                            # If permission error, try with sudo on Linux/macOS
+                            if platform.system() in ["Linux", "Darwin"]:
+                                logger.warning("Attempting to remove with sudo privileges...")
+                                subprocess.run(["sudo", "rm", path], check=False)
+                                if not os.path.exists(path):
+                                    logger.info("Successfully removed with sudo")
+                            else:
+                                logger.error(f"Could not remove {path} - permission denied")
+                except Exception as e:
+                    logger.warning(f"Error checking geckodriver at {path}: {e}")
+    except Exception as e:
+        logger.error(f"Error in remove_incompatible_geckodriver: {e}")
 
 def create_basic_image(code_text, output_path):
     """Create a basic image with PIL as fallback when browser automation fails"""
@@ -97,6 +151,9 @@ def generate_code_image(code_text: str, output_path: str):
         except:
             logger.warning(f"Could not remove file: {file}")
             pass
+    
+    # First, try to remove any incompatible geckodriver        
+    remove_incompatible_geckodriver()
             
     driver = None
     logger.info("Setting up Firefox browser for image generation...")

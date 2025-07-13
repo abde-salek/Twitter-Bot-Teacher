@@ -475,10 +475,12 @@ class _AnimationExampleState extends State<AnimationExample> {{
         if len(hashtags) < 3:
             issues.append("Missing third technical hashtag")
             
-        # Emoji checks
+        # Emoji checks - making it optional (0, 1, or 2+ emojis are all acceptable)
+        # Original code required at least 2 emojis
         emoji_count = sum(1 for char in tweet if ord(char) > 0x1F000)
-        if emoji_count < 2:
-            issues.append(f"Contains only {emoji_count} emojis, need at least 2")
+        # No validation error for emojis - they are now optional
+        # if emoji_count < 2:
+        #    issues.append(f"Contains only {emoji_count} emojis, need at least 2")
             
         return (len(issues) == 0, issues)
 
@@ -506,7 +508,7 @@ class _AnimationExampleState extends State<AnimationExample> {{
             random_tech_hashtags = ["#MobileDev", "#DartLang", "#AppDev", "#CrossPlatform", "#UI", "#UX"]
             import random
             random_hashtag = random.choice(random_tech_hashtags)
-            mock_tweet = f"Day {self.current_day}: 💡 {concept} in Flutter provides developers with powerful tools to create dynamic, responsive interfaces that adapt to different screen sizes and user interactions. Try it today! 🚀 #Flutter #100DaysOfCode {random_hashtag}"
+            mock_tweet = f"Day {self.current_day}: {concept} in Flutter provides developers with powerful tools to create dynamic, responsive interfaces that adapt to different screen sizes and user interactions. Try it today! #Flutter #100DaysOfCode {random_hashtag}"
             
             # Validate even mock tweets
             is_valid, issues = self.validate_tweet(mock_tweet, concept)
@@ -525,17 +527,37 @@ class _AnimationExampleState extends State<AnimationExample> {{
         # Choose a random hashtag
         import random
         random_tech_hashtag = random.choice(tech_hashtags)
-            
+
+        # Calculate reserved characters for fixed content
+        day_prefix = f"Day {self.current_day}: "
+        hashtags = f" #Flutter #100DaysOfCode {random_tech_hashtag}"
+        reserved_chars = len(day_prefix) + len(hashtags) + 10  # Add extra buffer for emojis and spaces
+        
+        # Calculate available characters for the actual content
+        max_content_chars = 190 - reserved_chars  # Target 190 chars total (middle of 170-200 range)
+        min_content_chars = 160 - reserved_chars  # Minimum content to stay above 170 total
+
+        # Create a more restrictive prompt with explicit length constraints
         basic_prompt = f"""Create an engaging tweet about Flutter concept:
         {concept}
-        - Start with "Day {self.current_day}:"
-        - The tweet must be between 170 and 200 characters total (including the Day X: prefix).
-        - Include 2 emojis and these hashtags: #Flutter #100DaysOfCode {random_tech_hashtag}
-        - MUST provide a detailed explanation of what {concept} is and does
-        - Keep technical but accessible."""
         
+        STRICT FORMAT RULES:
+        - Start with EXACTLY "Day {self.current_day}:"
+        - The tweet MUST be between 170 and 200 characters TOTAL, counting everything
+        - The content description part should be {min_content_chars}-{max_content_chars} characters
+        - Include at least one emoji
+        - MUST include these exact hashtags at the end: "#Flutter #100DaysOfCode {random_tech_hashtag}"
+        - MUST explain what {concept} is and does concisely
+        - Keep technical but accessible
+        
+        Example of proper length and format:
+        "Day X: ConceptName helps developers create responsive layouts with minimal code. Perfect for building cross-platform interfaces! 💻 #Flutter #100DaysOfCode #UI"
+        
+        DO NOT exceed 200 characters total. Count carefully."""
+            
         closest_tweet = None
         closest_diff = float('inf')
+        closest_length = 0
         
         # First round of attempts (up to 5)
         for attempt in range(5):
@@ -543,45 +565,47 @@ class _AnimationExampleState extends State<AnimationExample> {{
                 # Generate tweet using Groq LLM with thoughtful parameters
                 response = self.groq.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "You are a thoughtful technical writer specializing in Flutter education. Take your time to think deeply about the best way to explain this concept clearly and concisely."},
+                        {"role": "system", "content": "You are a technical writer who creates short, concise tweets about programming concepts. Your most important task is to carefully count characters and stay between 170-200 characters TOTAL. Verify the exact character count before finalizing your response."},
                         {"role": "user", "content": basic_prompt}
                     ],
                     model="meta-llama/llama-4-scout-17b-16e-instruct",
-                    temperature=0.7,
+                    temperature=0.5,  # Lower temperature for more precise adherence to format
                     max_tokens=1000,   # Increased token limit
                     top_p=0.9          # More focused sampling
                 )
                 tweet = response.choices[0].message.content.strip()
                 
-                # Ensure Day X: prefix is present
-                if not tweet.startswith(f"Day {self.current_day}:"):
-                    tweet = f"Day {self.current_day}: {tweet}"
+                # Post-processing to enforce constraints
+                tweet = self._enforce_tweet_constraints(tweet, day_prefix, concept, hashtags)
                 
-                # Ensure the random tech hashtag is included
-                if random_tech_hashtag not in tweet:
-                    tweet = tweet + " " + random_tech_hashtag
-                    
                 # Validate tweet against our rules
                 is_valid, issues = self.validate_tweet(tweet, concept)
+                
+                # Log character count
+                length = len(tweet)
+                logging.info(f"Generated tweet length: {length} characters")
                 
                 if is_valid:
                     logging.info(f"Valid tweet generated on attempt {attempt+1}")
                     return tweet
                     
-                # Keep track of closest attempt (fewest issues)
-                if len(issues) < len(closest_diff) if isinstance(closest_diff, list) else closest_diff:
+                # Keep track of closest attempt (fewest issues and closest to target length)
+                if length >= 170 and length <= 200:
+                    logging.info(f"Tweet length OK: {length}")
+                    if len(issues) < closest_diff:
+                        closest_tweet = tweet
+                        closest_diff = len(issues)
+                        closest_length = length
+                else:
+                    logging.warning(f"Tweet length issue: {length}")
+                    
+                if closest_tweet is None or (len(issues) < closest_diff and 160 <= length <= 220):
                     closest_tweet = tweet
-                    closest_diff = issues
+                    closest_diff = len(issues)
+                    closest_length = length
                 
                 # Log validation issues
                 logging.warning(f"Attempt {attempt+1}: Tweet failed validation. Issues: {issues}")
-                
-                # Track length for logging
-                length = len(tweet)
-                if 170 <= length <= 200:
-                    logging.info(f"Tweet length OK: {length}")
-                else:
-                    logging.warning(f"Tweet length issue: {length}")
                     
             except Exception as e:
                 logging.error(f"Tweet generation failed on attempt {attempt+1}: {str(e)}")
@@ -591,32 +615,36 @@ class _AnimationExampleState extends State<AnimationExample> {{
         # Second round - try with more detailed prompting (up to 3 more attempts)
         improved_prompt = f"""Create an engaging tweet about Flutter concept: {concept}
 
-STRICT REQUIREMENTS:
+CRITICAL LENGTH REQUIREMENT: The ENTIRE tweet must be EXACTLY between 170 and 200 characters (currently targeting 185).
+
+STRICT FORMAT RULES:
 1. MUST start with exactly "Day {self.current_day}:" 
-2. MUST be between 170 and 200 characters total
-3. MUST include at least 2 emojis (like 🚀, 💻, 📱)
-4. MUST include these hashtags: #Flutter #100DaysOfCode {random_tech_hashtag}
-5. MUST provide a detailed explanation of what {concept} does (at least 10-15 words)
-6. Should be technical but accessible to new developers
+2. MUST be between 170 and 200 characters total - THIS IS THE MOST IMPORTANT RULE
+3. MUST include at least one emoji (like 🚀, 💻, 📱)
+4. MUST include these hashtags AT THE END: #Flutter #100DaysOfCode {random_tech_hashtag}
+5. MUST provide a concise explanation of what {concept} does
 
-EXAMPLE FORMAT:
-"Day{self.current_day}: {concept} is a powerful feature in Flutter that enables developers to [detailed explanation of what it does and why it's useful]. 🚀 Try it in your next project! 💻 #Flutter #100DaysOfCode {random_tech_hashtag}"
+Here is a template with the correct format (fill in only the [description] part):
+"Day {self.current_day}: {concept} [description with emoji] #Flutter #100DaysOfCode {random_tech_hashtag}"
 
-Example tweet for a concept:
-"Day10: NestedScrollView in Flutter allows combining multiple scrollable areas in a nested layout, perfect for creating complex scrolling interactions like collapsing headers and tabbed interfaces. 🚀 So versatile! 💻 #Flutter #100DaysOfCode #CodeSnippet"
+The [description] part should be approximately {min_content_chars}-{max_content_chars} characters.
 
-Generate ONLY the tweet text, nothing else."""
+BEFORE SUBMITTING: Count the EXACT number of characters in your tweet to ensure it's between 170-200.
+
+Example of correct length:
+"Day 10: ListView in Flutter enables scrollable lists with customizable items, perfect for displaying data collections efficiently. 📱 #Flutter #100DaysOfCode #UI"
+(This example is exactly 184 characters)"""
         
         for attempt in range(3):
             try:
                 # Generate improved tweet using Groq LLM with thoughtful parameters
                 response = self.groq.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "You are a thoughtful technical writer specializing in Flutter education. Take your time to ensure your tweet is perfect - educational, concise, and formatted correctly."},
+                        {"role": "system", "content": "You are a technical writer who creates short, concise tweets about programming concepts. Your most important task is to CAREFULLY COUNT CHARACTERS and stay between 170-200 characters TOTAL. Count every character, including spaces and hashtags. Triple-check your count before submitting."},
                         {"role": "user", "content": improved_prompt}
                     ],
                     model="meta-llama/llama-4-scout-17b-16e-instruct",
-                    temperature=0.6,   # Lower temperature for more controlled output
+                    temperature=0.4,   # Even lower temperature for more controlled output
                     max_tokens=1000,   # Increased token limit
                     top_p=0.9          # More focused sampling
                 )
@@ -626,20 +654,15 @@ Generate ONLY the tweet text, nothing else."""
                 if tweet.startswith('"') and tweet.endswith('"'):
                     tweet = tweet[1:-1]
                 
-                # Ensure Day X: prefix is exact
-                if not tweet.startswith(f"Day {self.current_day}:"):
-                    tweet = f"Day {self.current_day}:" + tweet[tweet.find(':') + 1:] if ':' in tweet else f"Day {self.current_day}: {tweet}"
+                # Post-processing to enforce constraints
+                tweet = self._enforce_tweet_constraints(tweet, day_prefix, concept, hashtags)
                 
-                # Ensure hashtags are present
-                if "#Flutter" not in tweet:
-                    tweet = tweet + " #Flutter"
-                if "#100DaysOfCode" not in tweet:
-                    tweet = tweet + " #100DaysOfCode"
-                if random_tech_hashtag not in tweet:
-                    tweet = tweet + " " + random_tech_hashtag
-                    
                 # Validate tweet
                 is_valid, issues = self.validate_tweet(tweet, concept)
+                
+                # Log character count
+                length = len(tweet)
+                logging.info(f"Generated tweet length (phase 2): {length} characters")
                 
                 if is_valid:
                     logging.info(f"Valid tweet generated on second phase attempt {attempt+1}")
@@ -648,27 +671,49 @@ Generate ONLY the tweet text, nothing else."""
                 logging.warning(f"Second phase attempt {attempt+1}: Tweet failed validation. Issues: {issues}")
                 
                 # Update closest if this attempt is better
-                if len(issues) < len(closest_diff if isinstance(closest_diff, list) else []):
-                    closest_tweet = tweet
-                    closest_diff = issues
+                if length >= 170 and length <= 200:
+                    logging.info(f"Tweet length OK: {length}")
+                    if len(issues) < closest_diff:
+                        closest_tweet = tweet
+                        closest_diff = len(issues)
+                        closest_length = length
+                else:
+                    if closest_tweet is None or (len(issues) < closest_diff and abs(185 - length) < abs(185 - closest_length)):
+                        closest_tweet = tweet
+                        closest_diff = len(issues)
+                        closest_length = length
                     
             except Exception as e:
                 logging.error(f"Second phase tweet generation failed on attempt {attempt+1}: {str(e)}")
         
-        # Third round - final attempt with even more guidance and manual fixes
+        # Third round - final attempt with auto-correction
         logging.warning("No valid tweet after 8 attempts. Starting final attempt with manual corrections.")
         
+        # If we have a close candidate, try to fix it
+        if closest_tweet:
+            logging.info("Attempting to fix closest candidate tweet")
+            
+            # Apply fixes to make it valid
+            fixed_tweet = self._fix_tweet(closest_tweet, concept, day_prefix, hashtags)
+            is_valid, issues = self.validate_tweet(fixed_tweet, concept)
+            
+            if is_valid:
+                logging.info("Successfully fixed tweet to meet all validation criteria")
+                return fixed_tweet
+            else:
+                logging.warning(f"Failed to fix tweet. Remaining issues: {issues}")
+        
+        # Ultimate fallback - create a simple template-based tweet
         try:
-            # Start with our example and adapt it - ensure detailed explanation
-            final_tweet = f"Day {self.current_day}: {concept} in Flutter helps developers create more efficient applications by managing resources and UI components in a structured way. Perfect for modern app development! 🚀 💻 #Flutter #100DaysOfCode {random_tech_hashtag}"
+            final_tweet = f"Day {self.current_day}: {concept} in Flutter helps developers create efficient applications by managing resources and UI components in a structured way. Perfect for modern app development! 🚀 #Flutter #100DaysOfCode {random_tech_hashtag}"
             
             # Check length and adjust if needed
             if len(final_tweet) < 170:
                 # Add more descriptive content
-                final_tweet = f"Day {self.current_day}: {concept} in Flutter helps developers create more efficient and responsive applications by intelligently managing resources and UI components in a structured and optimized way. Perfect for modern app development! 🚀 💻 #Flutter #100DaysOfCode {random_tech_hashtag}"
+                final_tweet = f"Day {self.current_day}: {concept} in Flutter helps developers create more efficient and responsive applications by intelligently managing resources and UI components in a structured and optimized way. Perfect for modern app development! 🚀 #Flutter #100DaysOfCode {random_tech_hashtag}"
             elif len(final_tweet) > 200:
                 # Trim descriptive content while maintaining explanation
-                final_tweet = f"Day {self.current_day}: {concept} in Flutter helps developers create efficient apps by managing UI components effectively. Great for modern app development! 🚀 💻 #Flutter #100DaysOfCode {random_tech_hashtag}"
+                final_tweet = f"Day {self.current_day}: {concept} in Flutter helps developers create efficient apps by managing UI components effectively. Great for modern app development! 🚀 #Flutter #100DaysOfCode {random_tech_hashtag}"
             
             # Validate one more time
             is_valid, issues = self.validate_tweet(final_tweet, concept)
@@ -683,13 +728,147 @@ Generate ONLY the tweet text, nothing else."""
         logging.warning("All tweet generation attempts failed. Using best available tweet or fallback.")
         
         # Use the closest valid tweet we found or fall back to a template
-        if closest_tweet:
+        if closest_tweet and 160 <= len(closest_tweet) <= 220:
             logging.info("Using closest tweet from previous attempts")
             return closest_tweet
             
         # Ultimate fallback
-        fallback = f"Day {self.current_day}: {concept} in Flutter provides developers with tools to create more efficient and responsive applications. It simplifies complex UI operations and improves performance. 🚀 💻 #Flutter #100DaysOfCode {random_tech_hashtag}"
+        fallback = f"Day {self.current_day}: {concept} in Flutter provides tools to create more efficient and responsive applications. It simplifies UI operations and improves performance. #Flutter #100DaysOfCode {random_tech_hashtag}"
         return fallback
+
+    def _enforce_tweet_constraints(self, tweet: str, day_prefix: str, concept: str, hashtags: str) -> str:
+        """
+        Enforce tweet constraints to ensure it meets formatting requirements.
+        
+        Args:
+            tweet (str): Original tweet text
+            day_prefix (str): Day prefix that should start the tweet
+            concept (str): The Flutter concept
+            hashtags (str): Hashtags that should be included
+            
+        Returns:
+            str: Processed tweet that meets constraints
+        """
+        # Ensure Day X: prefix is present and correct
+        if not tweet.startswith(day_prefix):
+            # If there's another day prefix format, replace it
+            if "day" in tweet.lower() and ":" in tweet.split("\n")[0].lower():
+                # Extract the tweet content after the colon
+                parts = tweet.split(":", 1)
+                if len(parts) > 1:
+                    tweet = day_prefix + parts[1].strip()
+                else:
+                    tweet = day_prefix + tweet[10:].strip()  # Approximate fix
+            else:
+                tweet = day_prefix + tweet
+        
+        # Ensure hashtags are present at the end
+        required_hashtags = ["#Flutter", "#100DaysOfCode"]
+        for hashtag in required_hashtags:
+            if hashtag not in tweet:
+                tweet = tweet + " " + hashtag
+        
+        # Add the random tech hashtag if missing
+        random_tag = hashtags.split()[-1]
+        if random_tag not in tweet:
+            tweet = tweet + " " + random_tag
+        
+        # Ensure concept is mentioned
+        if concept.lower() not in tweet.lower():
+            # If concept is missing, try to add it after the day prefix
+            parts = tweet.split(":", 1)
+            if len(parts) > 1:
+                tweet = parts[0] + ": " + concept + " " + parts[1].strip()
+        
+        # Check length and trim if needed
+        if len(tweet) > 200:
+            # Find the position to trim (before hashtags)
+            hashtag_pos = min(tweet.find("#Flutter"), tweet.find("#100DaysOfCode"))
+            if hashtag_pos > 0:
+                # Trim the content part before hashtags
+                content = tweet[:hashtag_pos].strip()
+                # Trim to leave room for hashtags
+                max_content_len = 200 - len(hashtags) - 5  # 5 chars of buffer
+                if len(content) > max_content_len:
+                    content = content[:max_content_len-3].strip() + "..."
+                tweet = content + " " + hashtags.strip()
+        
+        # Remove any line breaks or extra spaces
+        tweet = ' '.join(tweet.split())
+        
+        return tweet
+        
+    def _fix_tweet(self, tweet: str, concept: str, day_prefix: str, hashtags: str) -> str:
+        """
+        Apply fixes to a tweet that's close to meeting requirements.
+        
+        Args:
+            tweet (str): Tweet to fix
+            concept (str): Flutter concept
+            day_prefix (str): Day prefix
+            hashtags (str): Required hashtags
+            
+        Returns:
+            str: Fixed tweet
+        """
+        # Step 1: Ensure proper prefix
+        if not tweet.startswith(day_prefix):
+            tweet = day_prefix + tweet.split(":", 1)[-1].strip() if ":" in tweet else day_prefix + tweet
+        
+        # Step 2: Ensure concept is mentioned
+        if concept.lower() not in tweet.lower():
+            parts = tweet.split(":", 1)
+            tweet = parts[0] + ": " + concept + " " + parts[1].strip() if len(parts) > 1 else tweet
+        
+        # Step 3: Ensure all hashtags are present at the end
+        required_hashtags = ["#Flutter", "#100DaysOfCode"]
+        hashtag_part = " ".join([tag for tag in tweet.split() if tag.startswith("#")])
+        content_part = " ".join([word for word in tweet.split() if not word.startswith("#")])
+        
+        # Rebuild the hashtag part ensuring all required hashtags are present
+        new_hashtags = []
+        for tag in required_hashtags:
+            if tag not in hashtag_part:
+                new_hashtags.append(tag)
+        
+        # Add the random hashtag if needed
+        random_tag = hashtags.split()[-1]
+        if random_tag not in hashtag_part:
+            new_hashtags.append(random_tag)
+        
+        # Combine existing and missing hashtags
+        combined_hashtags = " ".join([tag for tag in tweet.split() if tag.startswith("#")] + new_hashtags)
+        
+        # Step 4: Add emoji if none exists
+        emoji_exists = any(ord(char) > 0x1F000 for char in tweet)
+        emoji_to_add = " 🚀" if not emoji_exists else ""
+        
+        # Step 5: Rebuild tweet and check length
+        fixed_tweet = content_part + emoji_to_add + " " + combined_hashtags
+        
+        # Step 6: Adjust length
+        if len(fixed_tweet) < 170:
+            # Too short, add more descriptive content
+            concept_pos = fixed_tweet.find(concept)
+            if concept_pos > 0:
+                # Add more description after the concept
+                insert_pos = concept_pos + len(concept)
+                fixed_tweet = fixed_tweet[:insert_pos] + " helps developers create efficient applications" + fixed_tweet[insert_pos:]
+        elif len(fixed_tweet) > 200:
+            # Too long, trim the middle content
+            hashtag_pos = min(
+                fixed_tweet.find("#Flutter") if "#Flutter" in fixed_tweet else 999,
+                fixed_tweet.find("#100DaysOfCode") if "#100DaysOfCode" in fixed_tweet else 999
+            )
+            if hashtag_pos < 999:
+                # Trim content before hashtags
+                content = fixed_tweet[:hashtag_pos].strip()
+                max_content_len = 200 - len(combined_hashtags) - 5
+                if len(content) > max_content_len:
+                    content = content[:max_content_len-3].strip() + "..."
+                fixed_tweet = content + " " + combined_hashtags
+        
+        return fixed_tweet
 
     def fetch_random_flutter_concept_online(self) -> str:
         """

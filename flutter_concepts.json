@@ -17,5 +17,6 @@
   "`DeferredLoading`",
   "Flutter Web Canvas Performance",
   "`Semantics`",
-  "`ProxyProvider`"
+  "`ProxyProvider`",
+  "Flutter Deferred Components"
 ]
