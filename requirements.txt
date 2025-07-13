@@ -35,4 +35,4 @@ websocket-client==1.8.0
 wsproto==1.2.0
 yt-dlp==2025.4.30
 tweepy>=4.14.0  # Twitter API client
-webdriver-manager>=4.0.0  # Auto-manages webdriver binaries
+webdriver-manager>=4.0.0  # Auto-manages webdriver binaries including geckodriver

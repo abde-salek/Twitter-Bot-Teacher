@@ -8,6 +8,8 @@
 import os
 import time
 import shutil
+import platform
+import subprocess
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -19,10 +21,54 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementClickInterceptedException
 import logging
 
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def create_basic_image(code_text, output_path):
+    """Create a basic image with PIL as fallback when browser automation fails"""
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+        
+        # Create a basic image with the code text
+        width, height = 800, 600
+        bg_color = (40, 44, 52)  # Dark background similar to Carbon
+        text_color = (229, 229, 229)  # Light gray text
+        
+        img = Image.new("RGB", (width, height), bg_color)
+        draw = ImageDraw.Draw(img)
+        
+        # Use default font
+        try:
+            if platform.system() == "Windows":
+                font = ImageFont.truetype("arial.ttf", 14)
+            elif platform.system() == "Darwin":  # macOS
+                font = ImageFont.truetype("/Library/Fonts/Arial.ttf", 14)
+            elif platform.system() == "Linux":
+                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
+            else:
+                font = ImageFont.load_default()
+        except:
+            font = ImageFont.load_default()
+            
+        # Draw the code text with line breaks
+        y_position = 20
+        for line in code_text.split("\n"):
+            draw.text((20, y_position), line, fill=text_color, font=font)
+            y_position += 20
+            
+        img.save(output_path)
+        logger.info(f"Generated basic image: {output_path}")
+        
+        return output_path
+    except Exception as e:
+        logger.error(f"Failed to create basic image: {e}")
+        raise
+
 def generate_code_image(code_text: str, output_path: str):
     """
     Generate a code image using Carbon and save it to output_path.
-    Uses Firefox browser only.
+    Uses Firefox browser with automatic geckodriver management.
     
     Args:
         code_text (str): The code to render as an image.
@@ -49,44 +95,73 @@ def generate_code_image(code_text: str, output_path: str):
             if file.name != temp_filename:
                 os.remove(file)
         except:
-            print(f"Could not remove file: {file}")
+            logger.warning(f"Could not remove file: {file}")
             pass
             
     driver = None
-    print("Setting up Firefox browser for image generation...")
+    logger.info("Setting up Firefox browser for image generation...")
     
     try:
-        # Setup Firefox options with improved download handling
-        options = Options()
-        options.set_preference("browser.download.folderList", 2)
-        options.set_preference("browser.download.dir", download_dir)
-        options.set_preference("browser.download.manager.showWhenStarting", False)
-        options.set_preference("browser.helperApps.neverAsk.saveToDisk", "image/png,application/octet-stream")
-        options.set_preference("browser.download.always_ask_before_handling_new_types", False)
-        options.set_preference("browser.download.useDownloadDir", True)
-        options.set_preference("pdfjs.disabled", True)
-        options.add_argument("--headless")
+        # First, try to use webdriver-manager to get the correct geckodriver version
+        try:
+            from webdriver_manager.firefox import GeckoDriverManager
+            
+            # Setup Firefox options with improved download handling
+            options = Options()
+            options.set_preference("browser.download.folderList", 2)
+            options.set_preference("browser.download.dir", download_dir)
+            options.set_preference("browser.download.manager.showWhenStarting", False)
+            options.set_preference("browser.helperApps.neverAsk.saveToDisk", "image/png,application/octet-stream")
+            options.set_preference("browser.download.always_ask_before_handling_new_types", False)
+            options.set_preference("browser.download.useDownloadDir", True)
+            options.set_preference("pdfjs.disabled", True)
+            options.add_argument("--headless")
+            
+            # Get the correct geckodriver with webdriver-manager
+            logger.info("Downloading/using correct geckodriver version via webdriver-manager...")
+            driver_path = GeckoDriverManager().install()
+            logger.info(f"Using geckodriver from: {driver_path}")
+            
+            # Create a Firefox service with the managed driver
+            firefox_service = FirefoxService(executable_path=driver_path, log_path="geckodriver.log")
+            driver = webdriver.Firefox(service=firefox_service, options=options)
+            logger.info("Firefox browser initialized successfully with managed driver")
         
-        # Try to use a specific geckodriver service with custom log path
-        log_path = os.path.join(os.getcwd(), "geckodriver.log")
-        driver = webdriver.Firefox(
-            options=options,
-            service=FirefoxService(log_path=log_path)
-        )
-        print("Firefox browser initialized successfully")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Firefox with managed driver: {e}")
+            logger.info("Falling back to manual Firefox setup...")
+            
+            # Traditional setup as fallback
+            options = Options()
+            options.set_preference("browser.download.folderList", 2)
+            options.set_preference("browser.download.dir", download_dir)
+            options.set_preference("browser.download.manager.showWhenStarting", False)
+            options.set_preference("browser.helperApps.neverAsk.saveToDisk", "image/png,application/octet-stream")
+            options.set_preference("browser.download.always_ask_before_handling_new_types", False)
+            options.set_preference("browser.download.useDownloadDir", True)
+            options.set_preference("pdfjs.disabled", True)
+            options.add_argument("--headless")
+            
+            # Try to use a specific geckodriver service with custom log path
+            log_path = os.path.join(os.getcwd(), "geckodriver.log")
+            driver = webdriver.Firefox(
+                options=options,
+                service=FirefoxService(log_path=log_path)
+            )
+            logger.info("Firefox browser initialized with default driver")
         
         driver.set_page_load_timeout(30)
         wait = WebDriverWait(driver, 30)
         
         # Navigate to Carbon
         driver.get("https://carbon.now.sh")
-        print("Page loaded, waiting for editor...")
+        logger.info("Page loaded, waiting for editor...")
         
         # Wait for and focus editor
         editor = wait.until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.CodeMirror textarea"))
         )
-        print("Editor found")
+        logger.info("Editor found")
         
         # Clear existing code
         editor.send_keys(Keys.CONTROL + "a")
@@ -95,7 +170,7 @@ def generate_code_image(code_text: str, output_path: str):
 
         # Paste code
         editor.send_keys(code_text)
-        print("Code pasted")
+        logger.info("Code pasted")
         time.sleep(3)
 
         # Try multiple approaches to download the image
@@ -120,35 +195,35 @@ def generate_code_image(code_text: str, output_path: str):
         # Try each export method
         for i, method in enumerate(export_methods, 1):
             try:
-                print(f"Trying export method {i}...")
+                logger.info(f"Trying export method {i}...")
                 method()
-                print(f"Export method {i} executed, waiting for download...")
+                logger.info(f"Export method {i} executed, waiting for download...")
                 time.sleep(15)
                 
                 # Check if download was successful
                 downloads = list(Path(download_dir).glob("carbon*.png"))
                 if downloads:
                     newest_file = max(downloads, key=os.path.getctime)
-                    print(f"Found downloaded file: {newest_file}")
+                    logger.info(f"Found downloaded file: {newest_file}")
                     shutil.copy2(newest_file, abs_output_path)
-                    print(f"Image downloaded successfully: {abs_output_path}")
+                    logger.info(f"Image downloaded successfully: {abs_output_path}")
                     
                     # Verify file has content
                     if Path(abs_output_path).stat().st_size > 0:
-                        print(f"Image verified: {abs_output_path}, size: {Path(abs_output_path).stat().st_size} bytes")
+                        logger.info(f"Image verified: {abs_output_path}, size: {Path(abs_output_path).stat().st_size} bytes")
                         return abs_output_path
                     else:
-                        print(f"Warning: Image file has zero size: {abs_output_path}")
+                        logger.warning(f"Warning: Image file has zero size: {abs_output_path}")
                         continue
                 else:
-                    print("No download detected, trying next method")
+                    logger.warning("No download detected, trying next method")
             except Exception as e:
-                print(f"Export method {i} failed: {str(e)}")
+                logger.warning(f"Export method {i} failed: {str(e)}")
         
-        print("All export methods failed with Firefox")
+        logger.error("All export methods failed with Firefox")
         
     except Exception as e:
-        print(f"Error with Firefox: {str(e)}")
+        logger.error(f"Error with Firefox: {str(e)}")
     finally:
         if driver:
             try:
@@ -157,41 +232,5 @@ def generate_code_image(code_text: str, output_path: str):
                 pass
 
     # Ultimate fallback: Generate a basic image with PIL
-    print("Firefox attempt failed. Trying to create a basic image...")
-    try:
-        from PIL import Image, ImageDraw, ImageFont
-        from io import BytesIO
-        
-        # Create a basic image with the code text
-        width, height = 800, 600
-        bg_color = (40, 44, 52)  # Dark background similar to Carbon
-        text_color = (229, 229, 229)  # Light gray text
-        
-        img = Image.new("RGB", (width, height), bg_color)
-        draw = ImageDraw.Draw(img)
-        
-        # Use default font
-        try:
-            font = ImageFont.truetype("arial.ttf", 14)
-        except:
-            font = ImageFont.load_default()
-            
-        # Draw the code text with line breaks
-        y_position = 20
-        for line in code_text.split("\n"):
-            draw.text((20, y_position), line, fill=text_color, font=font)
-            y_position += 20
-            
-        img.save(abs_output_path)
-        print(f"Generated basic image: {abs_output_path}")
-        
-        # Verify file has content
-        if Path(abs_output_path).stat().st_size > 0:
-            return abs_output_path
-            
-    except ImportError:
-        print("PIL is not installed. Cannot generate fallback image.")
-    except Exception as e:
-        print(f"Error generating basic image: {str(e)}")
-        
-    raise RuntimeError("Failed to generate code image with all methods")
+    logger.warning("Firefox attempt failed. Creating basic image instead...")
+    return create_basic_image(code_text, abs_output_path)
