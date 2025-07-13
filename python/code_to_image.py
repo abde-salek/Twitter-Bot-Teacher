@@ -11,15 +11,19 @@ import shutil
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementClickInterceptedException
+import logging
 
 def generate_code_image(code_text: str, output_path: str):
     """
     Generate a code image using Carbon and save it to output_path.
+    Uses Firefox browser only.
+    
     Args:
         code_text (str): The code to render as an image.
         output_path (str): The file path to save the PNG image.
@@ -47,27 +51,33 @@ def generate_code_image(code_text: str, output_path: str):
         except:
             print(f"Could not remove file: {file}")
             pass
-
-    # Setup Firefox options with improved download handling
-    options = Options()
-    options.set_preference("browser.download.folderList", 2)
-    options.set_preference("browser.download.dir", download_dir)
-    options.set_preference("browser.download.manager.showWhenStarting", False)
-    options.set_preference("browser.helperApps.neverAsk.saveToDisk", "image/png,application/octet-stream")
-    options.set_preference("browser.download.always_ask_before_handling_new_types", False)
-    options.set_preference("browser.download.useDownloadDir", True)
-    options.set_preference("pdfjs.disabled", True)
-    
-    # Add headless option for server environments
-    # Comment out for debugging if needed
-    # options.add_argument("--headless")
-
-    # Start WebDriver (requires geckodriver and Firefox installed)
-    driver = webdriver.Firefox(options=options)
-    driver.set_page_load_timeout(30)  # Increased page load timeout
-    wait = WebDriverWait(driver, 30)  # Increased timeout
+            
+    driver = None
+    print("Setting up Firefox browser for image generation...")
     
     try:
+        # Setup Firefox options with improved download handling
+        options = Options()
+        options.set_preference("browser.download.folderList", 2)
+        options.set_preference("browser.download.dir", download_dir)
+        options.set_preference("browser.download.manager.showWhenStarting", False)
+        options.set_preference("browser.helperApps.neverAsk.saveToDisk", "image/png,application/octet-stream")
+        options.set_preference("browser.download.always_ask_before_handling_new_types", False)
+        options.set_preference("browser.download.useDownloadDir", True)
+        options.set_preference("pdfjs.disabled", True)
+        options.add_argument("--headless")
+        
+        # Try to use a specific geckodriver service with custom log path
+        log_path = os.path.join(os.getcwd(), "geckodriver.log")
+        driver = webdriver.Firefox(
+            options=options,
+            service=FirefoxService(log_path=log_path)
+        )
+        print("Firefox browser initialized successfully")
+        
+        driver.set_page_load_timeout(30)
+        wait = WebDriverWait(driver, 30)
+        
         # Navigate to Carbon
         driver.get("https://carbon.now.sh")
         print("Page loaded, waiting for editor...")
@@ -81,141 +91,107 @@ def generate_code_image(code_text: str, output_path: str):
         # Clear existing code
         editor.send_keys(Keys.CONTROL + "a")
         editor.send_keys(Keys.DELETE)
-        time.sleep(2)  # Increased wait time
+        time.sleep(2)
 
         # Paste code
         editor.send_keys(code_text)
         print("Code pasted")
-        time.sleep(3)  # Increased wait time
+        time.sleep(3)
 
-        # Try download via Carbon export first
-        image_downloaded = False
-        try:
-            # First try: Click the Export button directly using the exact XPath
-            print("Attempting to click export button using direct XPath...")
-            export_btn = wait.until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[2]/div[2]/div[1]/div[3]/div[3]/div[2]/div[1]/button[1]'))
-            )
-            export_btn.click()
-            print("Export button clicked using XPath, waiting for download...")
-            # Increased wait time to 15 seconds as requested
-            print("Waiting 15 seconds for download to complete...")
-            time.sleep(15)
-        except (TimeoutException, ElementClickInterceptedException, NoSuchElementException):
-            try:
-                # Second try: Try the original CSS selector approach
-                print("XPath approach failed, trying CSS selector...")
-                export_btn = wait.until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-cy="export-button"]'))
-                )
-                export_btn.click()
-                print("Export button clicked using CSS selector, waiting for download...")
-                # Increased wait time to 15 seconds
-                print("Waiting 15 seconds for download to complete...")
-                time.sleep(15)
-            except:
-                try:
-                    # Third try: Try keyboard shortcut
-                    print("CSS selector failed, trying keyboard shortcut...")
-                    editor.send_keys(Keys.SHIFT, Keys.CONTROL, 'e')
-                    print("Keyboard shortcut used, waiting for download...")
-                    # Increased wait time to 15 seconds
-                    print("Waiting 15 seconds for download to complete...")
-                    time.sleep(15)
-                except:
-                    # Fourth try: Try JavaScript click
-                    print("Keyboard shortcut failed, trying JavaScript click...")
-                    driver.execute_script("document.querySelector('button[data-cy=\"export-button\"]').click()")
-                    print("JavaScript click executed, waiting for download...")
-                    # Increased wait time to 15 seconds
-                    print("Waiting 15 seconds for download to complete...")
-                    time.sleep(15)
-        
-        # Check if download was successful by looking for new PNG files
-        downloads = list(Path(download_dir).glob("carbon*.png"))
-        if downloads:
-            newest_file = max(downloads, key=os.path.getctime)
-            # Copy the newest file to the target path
-            try:
-                print(f"Copying from {newest_file} to {abs_output_path}")
-                shutil.copy2(newest_file, abs_output_path)
-                print(f"Image downloaded successfully: {abs_output_path}")
-                image_downloaded = True
-            except Exception as e:
-                print(f"Error copying file: {str(e)}")
-                # If copy fails, use the downloaded file directly
-                abs_output_path = str(newest_file)
-                print(f"Using downloaded file directly: {abs_output_path}")
-                image_downloaded = True
-        
-        # Make file read-only to prevent accidental deletion if it exists
-        if Path(abs_output_path).exists():
-            try:
-                os.chmod(abs_output_path, 0o444)
-                print(f"Made file read-only: {abs_output_path}")
-            except:
-                print("Failed to make file read-only")
+        # Try multiple approaches to download the image
+        export_methods = [
+            # Method 1: XPath
+            lambda: wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[1]/main/div[2]/div[2]/div[1]/div[3]/div[3]/div[2]/div[1]/button[1]')
+            )).click(),
             
-            # Verify the file has content
-            if Path(abs_output_path).stat().st_size > 0:
-                print(f"Image verified: {abs_output_path}, size: {Path(abs_output_path).stat().st_size} bytes")
-            else:
-                print(f"Warning: Image file exists but has zero size: {abs_output_path}")
-                raise ValueError("Image file has zero size")
-                
-        if not image_downloaded:
-            # Ultimate fallback: Generate a basic image with PIL if all else fails
-            print("All download attempts failed. Attempting to generate a basic image with PIL.")
-            # This part of the original code was not provided in the edit hint,
-            # so it's kept as is, but it will likely fail if PIL is not imported.
-            # For the purpose of this edit, we'll assume PIL is available or
-            # that the user will add it if needed.
+            # Method 2: CSS Selector
+            lambda: wait.until(EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, 'button[data-cy="export-button"]')
+            )).click(),
+            
+            # Method 3: Keyboard shortcut
+            lambda: editor.send_keys(Keys.SHIFT, Keys.CONTROL, 'e'),
+            
+            # Method 4: JavaScript click
+            lambda: driver.execute_script("document.querySelector('button[data-cy=\"export-button\"]').click()")
+        ]
+        
+        # Try each export method
+        for i, method in enumerate(export_methods, 1):
             try:
-                from PIL import Image
-                from io import BytesIO
-                # This is a placeholder for a basic image generation.
-                # In a real scenario, you'd use a library like PIL to render text.
-                # For demonstration, we'll create a dummy image.
-                dummy_image = Image.new("RGB", (100, 50), color="white")
-                dummy_image.save(abs_output_path, "PNG")
-                print(f"Generated basic image: {abs_output_path}")
-            except ImportError:
-                raise ImportError("PIL is not installed. Please install it to generate a basic image.")
+                print(f"Trying export method {i}...")
+                method()
+                print(f"Export method {i} executed, waiting for download...")
+                time.sleep(15)
+                
+                # Check if download was successful
+                downloads = list(Path(download_dir).glob("carbon*.png"))
+                if downloads:
+                    newest_file = max(downloads, key=os.path.getctime)
+                    print(f"Found downloaded file: {newest_file}")
+                    shutil.copy2(newest_file, abs_output_path)
+                    print(f"Image downloaded successfully: {abs_output_path}")
+                    
+                    # Verify file has content
+                    if Path(abs_output_path).stat().st_size > 0:
+                        print(f"Image verified: {abs_output_path}, size: {Path(abs_output_path).stat().st_size} bytes")
+                        return abs_output_path
+                    else:
+                        print(f"Warning: Image file has zero size: {abs_output_path}")
+                        continue
+                else:
+                    print("No download detected, trying next method")
             except Exception as e:
-                print(f"Error generating basic image: {str(e)}")
-                raise
-
-    except TimeoutException as e:
-        print(f"Timeout waiting for element: {str(e)}")
-        try:
-            print("Current page source:")
-            print(driver.page_source[:1000] + "...")  # Print first 1000 chars to avoid huge logs
-        except:
-            print("Could not get page source")
-        raise
-    except NoSuchElementException as e:
-        print(f"Element not found: {str(e)}")
-        try:
-            print("Current page source:")
-            print(driver.page_source[:1000] + "...")
-        except:
-            print("Could not get page source")
-        raise
+                print(f"Export method {i} failed: {str(e)}")
+        
+        print("All export methods failed with Firefox")
+        
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        raise
+        print(f"Error with Firefox: {str(e)}")
     finally:
-        try:
-            driver.quit()
-        except:
-            pass  # Ignore errors when quitting the driver
+        if driver:
+            try:
+                driver.quit()
+            except:
+                pass
 
-    # Make one final verification that the file exists and has content
-    if not Path(abs_output_path).exists():
-        raise FileNotFoundError(f"Image file does not exist after all steps: {abs_output_path}")
+    # Ultimate fallback: Generate a basic image with PIL
+    print("Firefox attempt failed. Trying to create a basic image...")
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+        from io import BytesIO
         
-    if Path(abs_output_path).stat().st_size == 0:
-        raise ValueError(f"Image file exists but has zero size: {abs_output_path}")
+        # Create a basic image with the code text
+        width, height = 800, 600
+        bg_color = (40, 44, 52)  # Dark background similar to Carbon
+        text_color = (229, 229, 229)  # Light gray text
         
-    print(f"Final verification succeeded. Image ready at {abs_output_path}")
-    return abs_output_path
+        img = Image.new("RGB", (width, height), bg_color)
+        draw = ImageDraw.Draw(img)
+        
+        # Use default font
+        try:
+            font = ImageFont.truetype("arial.ttf", 14)
+        except:
+            font = ImageFont.load_default()
+            
+        # Draw the code text with line breaks
+        y_position = 20
+        for line in code_text.split("\n"):
+            draw.text((20, y_position), line, fill=text_color, font=font)
+            y_position += 20
+            
+        img.save(abs_output_path)
+        print(f"Generated basic image: {abs_output_path}")
+        
+        # Verify file has content
+        if Path(abs_output_path).stat().st_size > 0:
+            return abs_output_path
+            
+    except ImportError:
+        print("PIL is not installed. Cannot generate fallback image.")
+    except Exception as e:
+        print(f"Error generating basic image: {str(e)}")
+        
+    raise RuntimeError("Failed to generate code image with all methods")

@@ -34,6 +34,7 @@ Twitter-Bot-Teacher/
 ├── .env                    # API keys (excluded via .gitignore)
 ├── main.py                 # Entry point for local testing
 ├── requirements.txt        # Python dependencies
+├── setup_env.py            # Helper script for environment setup
 │
 ├── .github/
 │   └── workflows/
@@ -57,14 +58,57 @@ cd Twitter-Bot-Teacher
 ```
 pip install -r requirements.txt
 ```
-### 3. Add Twitter API Keys
--Create a .env file in the root
--Use the same structure on '.env.example' just replace the fields with your actual keys
+### 3. Setup Environment and API Keys
+
+Run the automated setup script:
+```bash
+python setup_env.py
+```
+
+This script will:
+- Create a `.env` file with your Twitter API credentials
+- Check if your web drivers (Chrome/Firefox) are installed and working
+
+Alternatively, manually create a `.env` file with:
+```
+GROQ_API_KEY=your_groq_api_key_here
+CONSUMER_KEY=your_twitter_api_key_here
+CONSUMER_SECRET=your_twitter_api_secret_here
+ACCESS_TOKEN=your_twitter_access_token_here
+ACCESS_TOKEN_SECRET=your_twitter_access_token_secret_here
+```
 
 ### 4. Test Locally
 ```
 python main.py
 ```
+
+### 5. Troubleshooting Common Issues
+
+#### GeckoDriver Compatibility
+If you encounter errors about GeckoDriver version compatibility:
+
+1. Check your Firefox and GeckoDriver versions:
+```bash
+firefox --version
+geckodriver --version
+```
+
+2. Install the correct GeckoDriver version:
+   - Download the compatible version from: https://github.com/mozilla/geckodriver/releases
+   - For Firefox 140.x, use GeckoDriver 0.36.0 or later
+
+3. Alternative: Use Chrome instead
+   - The bot now tries Chrome first, then Firefox as fallback
+   - Make sure you have Chrome and ChromeDriver installed
+
+#### Twitter API Authentication
+If you get "401 Unauthorized" errors when posting tweets:
+
+1. Verify your Twitter API credentials in `.env`
+2. Check if your Twitter Developer account is active
+3. Ensure your Twitter App has proper permissions (Read + Write)
+4. Regenerate tokens if needed through the Twitter Developer Portal
 
   ☁️ Run on GitHub Actions (Recommended)
 This project uses GitHub Actions to tweet daily. To enable:

@@ -221,7 +221,7 @@ STRICT RULES:
 - Every element must have a comment explaining usage.
 - Only the core logic. No setup, no main(), no imports unless required for the concept.
 - Use clear variable names and concise comments.
-- Take your time to think about the best way to showcase {clean_concept} in a minimal, educational way.
+- IMPORTANT: Take your time to think carefully about the best way to showcase {clean_concept} in a minimal, educational way.
 - Output ONLY the Dart code, nothing else.
 
 {widget_specific_prompt}
@@ -232,10 +232,14 @@ If you need documentation on {clean_concept}, you may reference pub.dev or Flutt
             try:
                 # Generate code using Groq LLM with higher temperature for creativity
                 response = self.groq.chat.completions.create(
-                    messages=[{"role": "user", "content": prompt}],
+                    messages=[
+                        {"role": "system", "content": "You are an expert Flutter developer. Take your time to think deeply about the best solution before responding. Quality is more important than speed."},
+                        {"role": "user", "content": prompt}
+                    ],
                     model="meta-llama/llama-4-scout-17b-16e-instruct",
-                    temperature=0.7,
-                    max_tokens=1000  # Increased token limit for more thinking space
+                    temperature=0.75,  # Slightly higher temperature for more thoughtful outputs
+                    max_tokens=2000,   # Increased token limit for more thinking space
+                    top_p=0.9          # More focused sampling
                 )
                 code = response.choices[0].message.content.strip()
                 code = self.clean_code(code)
@@ -536,11 +540,16 @@ class _AnimationExampleState extends State<AnimationExample> {{
         # First round of attempts (up to 5)
         for attempt in range(5):
             try:
-                # Generate tweet using Groq LLM
+                # Generate tweet using Groq LLM with thoughtful parameters
                 response = self.groq.chat.completions.create(
-                    messages=[{"role": "user", "content": basic_prompt}],
+                    messages=[
+                        {"role": "system", "content": "You are a thoughtful technical writer specializing in Flutter education. Take your time to think deeply about the best way to explain this concept clearly and concisely."},
+                        {"role": "user", "content": basic_prompt}
+                    ],
                     model="meta-llama/llama-4-scout-17b-16e-instruct",
-                    temperature=0.7
+                    temperature=0.7,
+                    max_tokens=1000,   # Increased token limit
+                    top_p=0.9          # More focused sampling
                 )
                 tweet = response.choices[0].message.content.strip()
                 
@@ -600,11 +609,16 @@ Generate ONLY the tweet text, nothing else."""
         
         for attempt in range(3):
             try:
-                # Generate improved tweet using Groq LLM
+                # Generate improved tweet using Groq LLM with thoughtful parameters
                 response = self.groq.chat.completions.create(
-                    messages=[{"role": "user", "content": improved_prompt}],
+                    messages=[
+                        {"role": "system", "content": "You are a thoughtful technical writer specializing in Flutter education. Take your time to ensure your tweet is perfect - educational, concise, and formatted correctly."},
+                        {"role": "user", "content": improved_prompt}
+                    ],
                     model="meta-llama/llama-4-scout-17b-16e-instruct",
-                    temperature=0.5  # Lower temperature for more controlled output
+                    temperature=0.6,   # Lower temperature for more controlled output
+                    max_tokens=1000,   # Increased token limit
+                    top_p=0.9          # More focused sampling
                 )
                 tweet = response.choices[0].message.content.strip()
                 
@@ -715,6 +729,7 @@ Generate ONLY the tweet text, nothing else."""
                 "that is NOT in this list (avoid duplicates or near-duplicates):\n"
                 f"{json.dumps(self.concepts)}\n\n"
                 "STRICT RULES:\n"
+                "- Take your time to think carefully about a unique and educational Flutter concept.\n"
                 "- Return ONLY the name of the concept or widget, nothing else.\n"
                 "- Keep the concept name CONCISE (1-4 words maximum).\n" 
                 "- Do NOT include descriptions or explanations in the name.\n"
@@ -723,9 +738,14 @@ Generate ONLY the tweet text, nothing else."""
                 "- Perfect examples: 'CustomScrollView', 'BackdropFilter', 'AnimatedContainer'"
             )
             response = self.groq.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                    {"role": "system", "content": "You are a Flutter expert with deep knowledge of the framework. Take your time to carefully consider which concept would be most valuable to teach."},
+                    {"role": "user", "content": prompt}
+                ],
                 model="meta-llama/llama-4-scout-17b-16e-instruct",
-                temperature=0.9
+                temperature=0.9,
+                max_tokens=500,    # Increased token limit 
+                top_p=0.9          # More focused sampling
             )
             concept = response.choices[0].message.content.strip()
             # Clean up any extra text

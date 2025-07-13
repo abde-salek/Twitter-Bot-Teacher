@@ -16,5 +16,6 @@
   "Flutter Desktop Embedding",
   "`DeferredLoading`",
   "Flutter Web Canvas Performance",
-  "`Semantics`"
+  "`Semantics`",
+  "`ProxyProvider`"
 ]
