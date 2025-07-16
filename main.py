@@ -1029,18 +1029,6 @@ Example of correct length:
                         if image_path.exists() and image_path.stat().st_size > 0:
                             image_generated = True
                             logging.info(f"Code image generated successfully on attempt {img_attempt+1}")
-                            
-                            # Create a persistent copy of the image with unique name
-                            persistent_dir = Path("images") / "archive"
-                            persistent_dir.mkdir(exist_ok=True)
-                            timestamp = time.strftime("%Y%m%d_%H%M%S")
-                            persistent_path = persistent_dir / f"code_{self.current_day}_{timestamp}.png"
-                            
-                            # Copy the image to the persistent location
-                            import shutil
-                            shutil.copy2(image_path, persistent_path)
-                            logging.info(f"Created persistent copy at {persistent_path}")
-                            
                             break
                         else:
                             logging.warning(f"Image file not created on attempt {img_attempt+1}")
@@ -1059,18 +1047,21 @@ Example of correct length:
                     logging.info(f"Posting tweet with image (size: {image_path.stat().st_size} bytes)")
                     tweet_id = self.x_client.post_tweet(tweet, str(image_path))
                 else:
-                    # Try to use the persistent copy if the original was deleted
-                    if 'persistent_path' in locals() and persistent_path.exists():
-                        logging.warning(f"Original image missing, using persistent copy at {persistent_path}")
-                        tweet_id = self.x_client.post_tweet(tweet, str(persistent_path))
-                    else:
-                        logging.warning("Image file disappeared before posting. Posting tweet without image.")
-                        tweet_id = self.x_client.post_tweet(tweet)
+                    logging.warning("Image file disappeared before posting. Posting tweet without image.")
+                    tweet_id = self.x_client.post_tweet(tweet)
             else:
                 logging.warning("Image generation skipped or failed. Posting tweet without image.")
                 tweet_id = self.x_client.post_tweet(tweet)
                 
             logging.info(f"Successfully posted tweet with ID: {tweet_id}")
+            
+            # Delete the image after posting
+            if image_generated and image_path.exists():
+                try:
+                    os.remove(image_path)
+                    logging.info(f"Deleted image after posting: {image_path}")
+                except Exception as e:
+                    logging.warning(f"Failed to delete image: {str(e)}")
 
             # Step 7: Update day counter
             logging.info(f"Updating day counter from {self.current_day} to {self.current_day + 1}")
