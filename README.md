@@ -31,15 +31,22 @@ Twitter-Bot-Teacher/
 │   ├── flutter_concepts.json  # JSON list of Flutter concepts
 │   └── day_counter.txt        # Tracks current tweet day number
 │
-├── .env                    # API keys (excluded via .gitignore)
-├── main.py                 # Entry point for local testing
-├── requirements.txt        # Python dependencies
+├── .env                     # API keys (excluded via .gitignore)
+├── main.py                  # Entry point for local testing
+├── requirements.txt         # Python dependencies
+├── setup_env.py             # Helper script for environment setup
+├── remove_geckodriver.py    # Script to remove incompatible geckodriver
+│
+├── run_bot.bat              # Windows batch file to run the bot
+├── run_bot_mock.bat         # Windows batch file to run in mock mode
+├── setup.bat                # Windows batch file for setup
+├── remove_geckodriver.bat   # Windows batch file to fix geckodriver
 │
 ├── .github/
 │   └── workflows/
-│       └── tweet.yml       # GitHub Actions workflow
+│       └── tweet.yml        # GitHub Actions workflow
 │
-└── README.md               # This file
+└── README.md                # This file
 ```
 
 ---
@@ -53,18 +60,86 @@ git clone https://github.com/your-username/Twitter-Bot-Teacher.git
 cd Twitter-Bot-Teacher
 ```
 
-### 2. Install Dependencies
-```
-pip install -r requirements.txt
-```
-### 3. Add Twitter API Keys
--Create a .env file in the root
--Use the same structure on '.env.example' just replace the fields with your actual keys
+### 2. Quick Start with Batch Files (Windows)
 
-### 4. Test Locally
+This project comes with convenient batch files for Windows users:
+
+1. **Setup**: Run `setup.bat` to install dependencies and configure your environment
+   ```
+   setup.bat
+   ```
+
+2. **Run the Bot**: Use `run_bot.bat` to start the bot
+   ```
+   run_bot.bat
+   ```
+
+3. **Test Mode**: For testing without making API calls, use mock mode
+   ```
+   run_bot_mock.bat
+   ```
+
+4. **Fix GeckoDriver**: If you encounter Firefox compatibility issues
+   ```
+   remove_geckodriver.bat
+   ```
+   Note: Run this as Administrator
+
+### 3. Manual Setup
+
+```bash
+pip install -r requirements.txt
+python setup_env.py
 ```
-python main.py
+
+### 4. Setup Environment and API Keys
+
+Run the automated setup script:
+```bash
+python setup_env.py
 ```
+
+This script will:
+- Create a `.env` file with your Twitter API credentials
+- Check if your web drivers (Chrome/Firefox) are installed and working
+
+Alternatively, manually create a `.env` file with:
+```
+GROQ_API_KEY=your_groq_api_key_here
+CONSUMER_KEY=your_twitter_api_key_here
+CONSUMER_SECRET=your_twitter_api_secret_here
+ACCESS_TOKEN=your_twitter_access_token_here
+ACCESS_TOKEN_SECRET=your_twitter_access_token_secret_here
+```
+
+### 5. Test Locally
+```bash
+python main.py  # Standard mode
+python main.py --mock  # Mock mode (no API calls)
+```
+
+### 6. Troubleshooting Common Issues
+
+#### GeckoDriver Compatibility
+If you encounter errors about GeckoDriver version compatibility:
+
+1. **Automatic Fix** (Windows): Run as Administrator
+   ```
+   remove_geckodriver.bat
+   ```
+
+2. **Manual Fix**:
+   - Run: `python remove_geckodriver.py`
+   - Or download the compatible version from: https://github.com/mozilla/geckodriver/releases
+   - For Firefox 140.x, use GeckoDriver 0.36.0 or later
+
+#### Twitter API Authentication
+If you get "401 Unauthorized" errors when posting tweets:
+
+1. Verify your Twitter API credentials in `.env`
+2. Check if your Twitter Developer account is active
+3. Ensure your Twitter App has proper permissions (Read + Write)
+4. Regenerate tokens if needed through the Twitter Developer Portal
 
   ☁️ Run on GitHub Actions (Recommended)
 This project uses GitHub Actions to tweet daily. To enable:

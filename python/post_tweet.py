@@ -21,11 +21,18 @@ class XAPI:
     Twitter/X API client for posting tweets with or without images.
     Handles authentication and error checking.
     """
-    def __init__(self):
+    def __init__(self, mock_mode=False):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.CONSUMER_v1 = self._authenticate_v1()
-        self.client_v2 = self._authenticate_v2()
-        self._validate_credentials()
+        self.mock_mode = mock_mode
+        
+        if not mock_mode:
+            self.CONSUMER_v1 = self._authenticate_v1()
+            self.client_v2 = self._authenticate_v2()
+            self._validate_credentials()
+        else:
+            self.logger.info("Running in mock mode - no actual tweets will be posted")
+            self.CONSUMER_v1 = None
+            self.client_v2 = None
 
     def _authenticate_v1(self):
         """Authenticate with Twitter API v1.1 (required for media upload)"""
@@ -69,22 +76,31 @@ class XAPI:
         Returns:
             str: ID of the posted tweet
         Raises:
-            FileNotFoundError: If image file is missing
             tweepy.TweepyException: For Twitter API errors
         """
+        # Handle mock mode for testing without API keys
+        if self.mock_mode:
+            self.logger.info(f"MOCK: Would post tweet: {text}")
+            if image_path:
+                if Path(image_path).exists():
+                    self.logger.info(f"MOCK: With image: {image_path}")
+                else:
+                    self.logger.warning(f"MOCK: Image not found: {image_path}, would post without image")
+            return "mock_tweet_id_12345"
+        
         media_ids = []
         
         try:
             # Handle image upload (if provided)
             if image_path:
                 image_path = str(image_path)  # Convert Path objects
-                if not Path(image_path).exists():
-                    raise FileNotFoundError(f"Image file not found: {image_path}")
-                
-                self.logger.info(f"Uploading image: {image_path}")
-                media = self.CONSUMER_v1.media_upload(image_path)
-                media_ids.append(media.media_id)
-                self.logger.info(f"Media uploaded (ID: {media.media_id})")
+                if Path(image_path).exists():
+                    self.logger.info(f"Uploading image: {image_path}")
+                    media = self.CONSUMER_v1.media_upload(image_path)
+                    media_ids.append(media.media_id)
+                    self.logger.info(f"Media uploaded (ID: {media.media_id})")
+                else:
+                    self.logger.warning(f"Image file not found: {image_path}, posting tweet without image")
 
             # Post tweet (with or without image)
             self.logger.info("Posting tweet...")
@@ -112,7 +128,8 @@ if __name__ == "__main__":
     )
     
     try:
-        x = XAPI()
+        # Use mock_mode=True for testing without actual API calls
+        x = XAPI(mock_mode=True)
         x.post_tweet(
             text="Test tweet with image! 🚀 #Flutter",
             image_path="test_image.png"
