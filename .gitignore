@@ -14,3 +14,9 @@ node_modules/
 # System
 .DS_Store
 *.log
+
+remove_geckodriver.bat
+remove_geckodriver.py
+run_bot.bat
+run_bot_mock.bat
+setup.bat
