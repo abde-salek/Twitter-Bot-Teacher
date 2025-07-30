@@ -70,11 +70,11 @@ class FlutterDailyBot:
         self.concepts: List[str] = self._load_concepts()
         self.current_day = self._load_day()
         # User guidance: To reset progress, set day_counter.txt to 1
-        # To add new concepts, edit flutter_concepts.json
+        # To add new concepts, edit data/flutter_concepts.json
         
     def _load_concepts(self) -> List[str]:
         """
-        Load list of Flutter concepts from flutter_concepts.json.
+        Load list of Flutter concepts from data/flutter_concepts.json.
         
         The concepts file should be a JSON array of strings, each representing
         a Flutter concept to be covered. For example:
@@ -84,9 +84,9 @@ class FlutterDailyBot:
             List[str]: List of Flutter concepts to cover
             
         Raises:
-            FileNotFoundError: If flutter_concepts.json is missing
+            FileNotFoundError: If data/flutter_concepts.json is missing
         """
-        concepts_file = Path("flutter_concepts.json")
+        concepts_file = Path("data/flutter_concepts.json")
         if not concepts_file.exists():
             # Create an empty concepts file if it doesn't exist
             concepts_file.write_text("[]")
@@ -969,15 +969,15 @@ Example of correct length:
 
     def add_concept_to_file(self, concept: str):
         """
-        Add a new concept to flutter_concepts.json.
+        Add a new concept to data/flutter_concepts.json.
         Args:
             concept (str): The concept to add
         """
-        concepts_file = Path("flutter_concepts.json")
+        concepts_file = Path("data/flutter_concepts.json")
         concepts = json.loads(concepts_file.read_text())
         concepts.append(concept)
         concepts_file.write_text(json.dumps(concepts, indent=2))
-        logging.info(f"Added new concept to flutter_concepts.json: {concept}")
+        logging.info(f"Added new concept to data/flutter_concepts.json: {concept}")
 
     def daily_workflow(self):
         """
@@ -1000,7 +1000,7 @@ Example of correct length:
             if self.mock_mode or self.groq is None:
                 # Mode: Use existing concepts sequentially
                 if not self.concepts:
-                    logging.error("No concepts available and no API key for generating new ones. Please add concepts to flutter_concepts.json or provide API keys.")
+                    logging.error("No concepts available and no API key for generating new ones. Please add concepts to data/flutter_concepts.json or provide API keys.")
                     return
                 
                 # Use current day to select concept (cycling through the list)
