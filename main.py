@@ -70,11 +70,11 @@ class FlutterDailyBot:
         self.concepts: List[str] = self._load_concepts()
         self.current_day = self._load_day()
         # User guidance: To reset progress, set day_counter.txt to 1
-        # To add new concepts, edit flutter_concepts.json
+        # To add new concepts, edit data/flutter_concepts.json
         
     def _load_concepts(self) -> List[str]:
         """
-        Load list of Flutter concepts from flutter_concepts.json.
+        Load list of Flutter concepts from data/flutter_concepts.json.
         
         The concepts file should be a JSON array of strings, each representing
         a Flutter concept to be covered. For example:
@@ -84,9 +84,9 @@ class FlutterDailyBot:
             List[str]: List of Flutter concepts to cover
             
         Raises:
-            FileNotFoundError: If flutter_concepts.json is missing
+            FileNotFoundError: If data/flutter_concepts.json is missing
         """
-        concepts_file = Path("flutter_concepts.json")
+        concepts_file = Path("data/flutter_concepts.json")
         if not concepts_file.exists():
             # Create an empty concepts file if it doesn't exist
             concepts_file.write_text("[]")
@@ -508,7 +508,14 @@ class _AnimationExampleState extends State<AnimationExample> {{
             random_tech_hashtags = ["#MobileDev", "#DartLang", "#AppDev", "#CrossPlatform", "#UI", "#UX"]
             import random
             random_hashtag = random.choice(random_tech_hashtags)
-            mock_tweet = f"Day {self.current_day}: {concept} in Flutter provides developers with powerful tools to create dynamic, responsive interfaces that adapt to different screen sizes and user interactions. Try it today! #Flutter #100DaysOfCode {random_hashtag}"
+            # Create a properly sized mock tweet that adapts to concept name length
+            base_template = f"Day {self.current_day}: {concept} enables powerful visual effects and enhanced user experiences in your Flutter apps. Master this essential technique for better UI! 🎨 #Flutter #100DaysOfCode {random_hashtag}"
+            
+            # If the tweet is too long, use a shorter template
+            if len(base_template) > 200:
+                mock_tweet = f"Day {self.current_day}: {concept} provides powerful features for creating better Flutter applications. Essential for modern app development! 🚀 #Flutter #100DaysOfCode {random_hashtag}"
+            else:
+                mock_tweet = base_template
             
             # Validate even mock tweets
             is_valid, issues = self.validate_tweet(mock_tweet, concept)
@@ -962,45 +969,59 @@ Example of correct length:
 
     def add_concept_to_file(self, concept: str):
         """
-        Add a new concept to flutter_concepts.json.
+        Add a new concept to data/flutter_concepts.json.
         Args:
             concept (str): The concept to add
         """
-        concepts_file = Path("flutter_concepts.json")
+        concepts_file = Path("data/flutter_concepts.json")
         concepts = json.loads(concepts_file.read_text())
         concepts.append(concept)
         concepts_file.write_text(json.dumps(concepts, indent=2))
-        logging.info(f"Added new concept to flutter_concepts.json: {concept}")
+        logging.info(f"Added new concept to data/flutter_concepts.json: {concept}")
 
     def daily_workflow(self):
         """
-        Dynamic workflow:
-        1. Fetch a random Flutter concept online using Groq
-        2. If it or a similar one exists in flutter_concepts.json, retry
-        3. Add the new concept to flutter_concepts.json
-        4. Generate tweet and code snippet
-        5. Generate code image
-        6. Post to Twitter
-        7. Update day counter
+        Hybrid workflow:
+        - With API keys: Fetch new concepts dynamically and add to list
+        - Without API keys: Use existing concepts from the list sequentially
+        
+        Steps:
+        1. Choose concept (new via Groq OR existing from list)
+        2. Generate tweet and code snippet  
+        3. Generate code image
+        4. Post to Twitter
+        5. Update day counter
         """
         # Create images directory if it doesn't exist
         Path("images").mkdir(exist_ok=True)
         
         try:
-            # Step 1-2: Find a unique concept not in our list
-            for attempt in range(10):  # Avoid infinite loop
-                concept = self.fetch_random_flutter_concept_online()
-                if not self.is_similar_concept(concept, self.concepts):
-                    logging.info(f"Found unique concept on attempt {attempt+1}: {concept}")
-                    break
-                logging.info(f"Attempt {attempt+1}: Concept '{concept}' already exists or is similar. Retrying...")
+            # Choose concept based on whether we have API access
+            if self.mock_mode or self.groq is None:
+                # Mode: Use existing concepts sequentially
+                if not self.concepts:
+                    logging.error("No concepts available and no API key for generating new ones. Please add concepts to data/flutter_concepts.json or provide API keys.")
+                    return
+                
+                # Use current day to select concept (cycling through the list)
+                concept_index = (self.current_day - 1) % len(self.concepts)
+                concept = self.concepts[concept_index]
+                logging.info(f"Using existing concept #{concept_index + 1}: {concept}")
             else:
-                logging.error("Failed to find a new unique concept after 10 attempts.")
-                return
+                # Mode: Generate new concepts dynamically
+                for attempt in range(10):  # Avoid infinite loop
+                    concept = self.fetch_random_flutter_concept_online()
+                    if not self.is_similar_concept(concept, self.concepts):
+                        logging.info(f"Found unique concept on attempt {attempt+1}: {concept}")
+                        break
+                    logging.info(f"Attempt {attempt+1}: Concept '{concept}' already exists or is similar. Retrying...")
+                else:
+                    logging.error("Failed to find a new unique concept after 10 attempts.")
+                    return
 
-            # Step 3: Add the new concept to our list
-            self.add_concept_to_file(concept)
-            self.concepts.append(concept)
+                # Add the new concept to our list
+                self.add_concept_to_file(concept)
+                self.concepts.append(concept)
 
             # Step 4: Generate tweet and code
             logging.info(f"Generating tweet for concept: {concept}")
